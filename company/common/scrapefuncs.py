@@ -1,8 +1,17 @@
 from common import errorhandling
+import pandas as pd
 import requests
 import urllib.parse
 import html
 import json
+
+#%%
+def get_urls(filepath, company_name):
+    urls = pd.read_csv('urls.csv')
+    urls = urls[urls['company']==company_name]
+    urls = urls.to_dict(orient='records')[0] # should only have 1 record per company
+    urls = {k:v for k,v in urls.items() if v==v} # remove nan values
+    return(urls)
 
 #%% request
 @errorhandling.requests_error
@@ -29,12 +38,12 @@ def metadata(co, date):
 
 #%% include special characters in url instead of encoding (https://stackoverflow.com/a/12528097)
 def encode(query, chars):
-    l = []
+    encoded = []
     for k, v in query.items():
         k = urllib.parse.quote(str(k), safe=chars)
         v = urllib.parse.quote(str(v), safe=chars)
-        l.append(k + '=' + v)
-    return '&'.join(l)
+        encoded.append(k + '=' + v)
+    return '&'.join(encoded)
 
 #%% remove all encoding and multi-whitespaces from strings
 def decode(str_obj):
