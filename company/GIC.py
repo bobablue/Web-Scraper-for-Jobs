@@ -1,17 +1,20 @@
 import os
-import common.scrapefuncs as sf
-import common.errorhandling as errorhandling
 import datetime
 from bs4 import BeautifulSoup
 import re
 
+# import custom scripts (https://stackoverflow.com/a/38455936)
+if __name__=='__main__' and __package__ is None:
+    os.sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from util import scrape_funcs, error_handling
+
 #%% static data
-meta = {'urls':sf.get_urls('urls.csv', os.path.splitext(os.path.basename(__file__))[0])}
+meta = {'urls':scrape_funcs.get_urls('urls.csv', os.path.splitext(os.path.basename(__file__))[0])}
 
 #%% functions
 #%% parse beautifulsoup object into dict
-@errorhandling.data_error
-@sf.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
+@error_handling.data_error
+@scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
 def extract_data(soup_obj):
     data = soup_obj.find_all('tr', class_='data-row')
     data_dict = {}
@@ -24,7 +27,7 @@ def extract_data(soup_obj):
 
 #%% get total number of pages of career website and generate list of URLs for each page
 def get_jobs():
-    response = sf.pull('get', url=meta['urls']['page'])
+    response = scrape_funcs.pull('get', url=meta['urls']['page'])
     bs_text = BeautifulSoup(response.content, 'html.parser').find('caption').text
     results_per_pg = int(re.compile(r'Results \d+ to (\d+)').findall(bs_text)[0])
     pages = int(re.compile(r'Page \d+ of (\d+)').findall(bs_text)[0])
@@ -33,7 +36,7 @@ def get_jobs():
     # compile jobs from all pages into 1 dict
     jobs_dict = {}
     for pg in pages:
-        response = sf.pull('get', url=pg)
+        response = scrape_funcs.pull('get', url=pg)
         bs_obj = BeautifulSoup(response.content, 'html.parser')
         jobs_dict.update(extract_data(bs_obj))
     return(jobs_dict)
@@ -41,4 +44,4 @@ def get_jobs():
 #%%
 if __name__=='__main__':
     jobs_dict = get_jobs()
-    sf.to_json(meta['urls']['company'], jobs_dict)
+    scrape_funcs.to_json(meta['urls']['company'], jobs_dict)

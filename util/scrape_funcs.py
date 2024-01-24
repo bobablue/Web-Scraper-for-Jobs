@@ -1,4 +1,4 @@
-from common import errorhandling
+from util import error_handling
 import pandas as pd
 import requests
 import urllib.parse
@@ -14,7 +14,7 @@ def get_urls(filepath, company_name):
     return(urls)
 
 #%% request
-@errorhandling.requests_error
+@error_handling.requests_error
 def pull(pulltype, json_decode=False, **kwargs):
     if pulltype=='get':
         response = requests.get(**kwargs)
