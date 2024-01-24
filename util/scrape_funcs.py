@@ -1,4 +1,5 @@
 from util import error_handling
+import os
 import pandas as pd
 import requests
 import urllib.parse
@@ -7,11 +8,22 @@ import json
 
 #%%
 def get_urls(filepath, company_name):
-    urls = pd.read_csv('urls.csv')
+    urls = pd.read_csv(filepath)
     urls = urls[urls['company']==company_name]
     urls = urls.to_dict(orient='records')[0] # should only have 1 record per company
     urls = {k:v for k,v in urls.items() if v==v} # remove nan values
     return(urls)
+
+#%%
+def track_status(script_name):
+    def inner(func):
+        def wrapper(*args, **kwargs):
+            module_name = os.path.splitext(os.path.basename(script_name))[0]
+            output = func(*args, **kwargs)
+            print(f"[{module_name}] done")
+            return(output)
+        return(wrapper)
+    return(inner)
 
 #%% request
 @error_handling.requests_error

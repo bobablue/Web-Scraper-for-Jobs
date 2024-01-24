@@ -9,7 +9,7 @@ if __name__=='__main__' and __package__ is None:
 from util import scrape_funcs, error_handling
 
 #%% static data
-meta = {'urls':scrape_funcs.get_urls('urls.csv', os.path.splitext(os.path.basename(__file__))[0])}
+meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0])}
 
 #%% functions
 #%% parse beautifulsoup object into dict
@@ -26,6 +26,7 @@ def extract_data(soup_obj):
     return(data_dict)
 
 #%% get total number of pages of career website and generate list of URLs for each page
+@scrape_funcs.track_status(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'])
     bs_text = BeautifulSoup(response.content, 'html.parser').find('caption').text

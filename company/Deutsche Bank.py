@@ -8,7 +8,7 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 # 71:'United Kingdom', 189:'Singapore', 1628:'Frankfurt am Main', 1698:'Frankfurt'
-meta = {'urls':scrape_funcs.get_urls('urls.csv', os.path.splitext(os.path.basename(__file__))[0]),
+meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
         'locations':{'PositionLocation.Country':[71, 189], 'PositionLocation.City':[1628, 1698]}}
 
 # requests parameters
@@ -32,6 +32,7 @@ def extract_data(json_obj):
     return(data_dict)
 
 #%%
+@scrape_funcs.track_status(__file__)
 def get_jobs():
     jobs_dict = {}
     for i,j in meta['locations'].items():
