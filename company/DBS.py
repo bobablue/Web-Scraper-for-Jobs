@@ -13,11 +13,10 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 headers = {'tz':'GMT+08:00'}
 
 # location:singapore; job schedule:full-time; start from page 1
-json_data = {'filterSelectionParam':{'searchFilterSelections':[{'id':'LOCATION', 'selectedValues':['2615100183']},
-                                                               {'id':'JOB_SCHEDULE', 'selectedValues':['1']}]},
+json_data = {'filterSelectionParam':{'searchFilterSelections':[{'id':'LOCATION', 'selectedValues':['2615100183']}]},
              'pageNo':1}
 
-#%% functions
+#%% functions {'id':'JOB_SCHEDULE', 'selectedValues':['1']}
 #%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
