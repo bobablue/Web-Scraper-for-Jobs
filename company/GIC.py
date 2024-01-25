@@ -10,6 +10,7 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0])}
+meta['urls']['page'] = meta['urls']['page'].replace('/?','/?location=singapore&') # narrow search to singapore only
 
 #%% functions
 #%% parse beautifulsoup object into dict
@@ -45,4 +46,4 @@ def get_jobs():
 #%%
 if __name__=='__main__':
     jobs_dict = get_jobs()
-    scrape_funcs.to_json(meta['urls']['company'], jobs_dict)
+    #scrape_funcs.to_json(meta['urls']['company'], jobs_dict)
