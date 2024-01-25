@@ -46,4 +46,4 @@ def get_jobs():
 #%%
 if __name__=='__main__':
     jobs_dict = get_jobs()
-    #scrape_funcs.to_json(meta['urls']['company'], jobs_dict)
+    scrape_funcs.to_json(meta['urls']['company'], jobs_dict)
