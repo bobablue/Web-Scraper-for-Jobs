@@ -13,7 +13,7 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 headers = {'tz':'GMT+08:00'}
 
 # location:singapore; start from page 1
-json_data = {'filterSelectionParam':{'searchFilterSelections':[{'id':'LOCATION', 'selectedValues':['2615100183']}]},
+json_data = {'filterSelectionParam':{'searchFilterSelections':[{'id':'LOCATION', 'selectedValues':['160422287']}]},
              'pageNo':1}
 
 #%% functions
@@ -59,5 +59,4 @@ def get_jobs():
 #%%
 if __name__=='__main__':
     jobs_dict = get_jobs()
-    print(len(jobs_dict))
-    #scrape_funcs.to_json(meta['urls']['company'], jobs_dict)
+    scrape_funcs.to_json(meta['urls']['company'], jobs_dict)
