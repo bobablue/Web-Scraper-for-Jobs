@@ -47,12 +47,15 @@ jobs['dataframe'] = pd.DataFrame.from_dict({v1:jobs['dict'][k1][v1] for k1 in jo
                                            orient='index')
 
 jobs['dataframe'] = jobs['dataframe'].reset_index().rename(columns={'index':'URL'})
-jobs['dataframe'] = jobs['dataframe'][cols['jobs']]
+jobs['dataframe'] = jobs['dataframe'][cols['jobs']].sort_values(by=['Company','Location','Title']).reset_index(drop=True)
 
 #%% filters
 #%% keyword filters on job titles, show latest
 jobs['keywords'] = ['analy','data','economi','model','python','risk','scien']
+jobs['exclude'] = ['intern']
+
 jobs['filtered'] = jobs['dataframe'][jobs['dataframe']['Title'].str.lower().str.contains('|'.join(jobs['keywords']))]
+jobs['filtered'] = jobs['filtered'][~jobs['filtered']['Title'].str.lower().str.contains('|'.join(jobs['exclude']))]
 
 #%% show only new (filtered) jobs since the last update using URL as key
 # rename current latest file by adding max(date scraped) to file name, then move file to archive
