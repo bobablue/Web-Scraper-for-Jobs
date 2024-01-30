@@ -9,10 +9,9 @@ if __name__=='__main__' and __package__ is None:
 from util import scrape_funcs, error_handling
 
 #%% static data
-meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0])}
+meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
 
-# requests parameters
-url_params = {'locationsearch':'singapore'}
+        'requests':{'url':{'locationsearch':'singapore'}}}
 
 #%% functions
 #%%
@@ -33,11 +32,11 @@ def jobs(soup_obj):
 @scrape_funcs.track_status(__file__)
 def get_jobs():
     # get total number of pages of career website and generate list of URLs for each page
-    response = scrape_funcs.pull('get', url=meta['urls']['page'], params=url_params)
+    response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
     bs_text = BeautifulSoup(response.content, 'html.parser').find('caption').text
     results_per_pg = int(re.compile(r'Results \d+ to (\d+)').findall(bs_text)[0])
 
-    pages_prefix = meta['urls']['page'] + ''.join([f'&{k}={v}' for k,v in url_params.items()])
+    pages_prefix = meta['urls']['page'] + ''.join([f'&{k}={v}' for k,v in meta['requests']['url'].items()])
     pages = int(re.compile(r'Page \d+ of (\d+)').findall(bs_text)[0])
     pages = [f'{pages_prefix}&startrow={i*results_per_pg}' for i in range(pages)]
 

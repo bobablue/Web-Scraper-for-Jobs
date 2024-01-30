@@ -9,12 +9,12 @@ from util import scrape_funcs, error_handling
 #%% static data
 # 71:'United Kingdom', 189:'Singapore', 1628:'Frankfurt am Main', 1698:'Frankfurt'
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-        'locations':{'PositionLocation.Country':[71, 189], 'PositionLocation.City':[1628, 1698]}}
 
-# requests parameters
-json_data = {'SearchParameters':{'CountItem':100,
-             'MatchedObjectDescriptor':['PositionID','PositionTitle','OrganizationName']},
-             'SearchCriteria':None}
+        'locations':{'PositionLocation.Country':[71, 189], 'PositionLocation.City':[1628, 1698]},
+
+        'requests':{'json':{'SearchParameters':{'CountItem':100,
+                                                'MatchedObjectDescriptor':['PositionID','PositionTitle','OrganizationName']},
+                            'SearchCriteria':None}}}
 
 #%% functions
 #%%
@@ -36,13 +36,13 @@ def extract_data(json_obj):
 def get_jobs():
     jobs_dict = {}
     for i,j in meta['locations'].items():
-        json_data['SearchCriteria'] = [{'CriterionName':i, 'CriterionValue':j}]
-        response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], json=json_data)
+        meta['requests']['json']['SearchCriteria'] = [{'CriterionName':i, 'CriterionValue':j}]
+        response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], json=meta['requests']['json'])
 
         # if no_jobs>default in CountItem, update json_data and call again with updated number
-        if response['SearchResult']['SearchResultCountAll']>json_data['SearchParameters']['CountItem']:
-            json_data['SearchParameters']['CountItem'] = response['SearchResult']['SearchResultCountAll']
-            response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], json=json_data)
+        if response['SearchResult']['SearchResultCountAll']>meta['requests']['json']['SearchParameters']['CountItem']:
+            meta['requests']['json']['SearchParameters']['CountItem'] = response['SearchResult']['SearchResultCountAll']
+            response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], json=meta['requests']['json'])
 
         jobs_dict.update(extract_data(response))
     return(jobs_dict)
