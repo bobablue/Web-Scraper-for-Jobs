@@ -9,7 +9,7 @@ from util import scrape_funcs, error_handling
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
 
-        'requests':{'finder':{'siteNumber':'CX_1', 'limit':None, 'locationId':'300000000229065'}, # singapore
+        'requests':{'finder':{'siteNumber':'CX_1001', 'limit':None, 'locationId':'300000000289639'}, # singapore
                     'url':{'expand':'requisitionList.secondaryLocations,flexFieldsFacet.values', 'finder':None}}}
 
 #%% functions
