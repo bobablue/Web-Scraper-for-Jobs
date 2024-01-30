@@ -48,6 +48,12 @@ def metadata(co, date):
         return(wrapper)
     return(add_meta)
 
+#%% update total number of jobs in various parameter objects
+def update_num_jobs(num_jobs, finder, url):
+    finder['limit'] = num_jobs
+    url['finder'] = f"findReqs;{','.join(f'{k}={v}' for k,v in finder.items())}"
+    return(finder, url)
+
 #%% include special characters in url instead of encoding (https://stackoverflow.com/a/12528097)
 def encode(query, chars):
     encoded = []
