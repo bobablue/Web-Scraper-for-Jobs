@@ -44,9 +44,9 @@ def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
     bs_obj = BeautifulSoup(response.content, 'html.parser')
 
-    no_jobs = ' '.join(bs_obj.find_all('div', class_='list-controls__text__legend')[0].text.split())
-    no_jobs = int(re.compile(r'(\d*)\+? results').findall(no_jobs)[0])
-    pages = no_jobs//meta['requests']['url']['pipelineRecordsPerPage'] + (no_jobs % meta['requests']['url']['pipelineRecordsPerPage']>0)
+    num_jobs = ' '.join(bs_obj.find_all('div', class_='list-controls__text__legend')[0].text.split())
+    num_jobs = int(re.compile(r'(\d*)\+? results').findall(num_jobs)[0])
+    pages = num_jobs//meta['requests']['url']['pipelineRecordsPerPage'] + (num_jobs % meta['requests']['url']['pipelineRecordsPerPage']>0)
 
     # parse first page
     jobs_dict = {}

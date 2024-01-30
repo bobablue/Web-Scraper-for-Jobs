@@ -27,11 +27,11 @@ def jobs(json_obj):
 @scrape_funcs.track_status(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], params=meta['requests']['url'])
-    no_jobs = response['totalMatches']
+    num_jobs = response['totalMatches']
 
-    # if no_jobs>default in rows, update url_params and call again with updated number
-    if no_jobs>meta['requests']['url']['rows']:
-        meta['requests']['url']['rows'] = no_jobs
+    # if num_jobs>default in rows, update url_params and call again with updated number
+    if num_jobs>meta['requests']['url']['rows']:
+        meta['requests']['url']['rows'] = num_jobs
         response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], params=meta['requests']['url'])
 
     jobs_dict = jobs(response['jobsList'])

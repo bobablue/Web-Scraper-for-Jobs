@@ -35,11 +35,11 @@ def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'],
                                  params=scrape_funcs.encode(meta['requests']['url'], meta['chars']))
 
-    no_jobs = int(re.compile(r'data-total-results="(\d+)"').findall(response.json()['results'])[0])
+    num_jobs = int(re.compile(r'data-total-results="(\d+)"').findall(response.json()['results'])[0])
 
-    # if no_jobs>default in RecordsPerPage, update url_params and call again with updated number
-    if no_jobs>meta['requests']['url']['RecordsPerPage']:
-        meta['requests']['url']['RecordsPerPage'] = no_jobs
+    # if num_jobs>default in RecordsPerPage, update url_params and call again with updated number
+    if num_jobs>meta['requests']['url']['RecordsPerPage']:
+        meta['requests']['url']['RecordsPerPage'] = num_jobs
         response = scrape_funcs.pull('get', url=meta['urls']['page'],
                                      params=scrape_funcs.encode(meta['requests']['url'], meta['chars']))
 

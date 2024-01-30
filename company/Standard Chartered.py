@@ -45,10 +45,10 @@ def get_jobs():
     response = scrape_funcs.pull('post', url=meta['urls']['page'],
                                  headers=meta['requests']['headers'], data=meta['requests']['post'])
 
-    # if no_jobs>default in dropListSize, update post_data and call again with updated number
-    no_jobs = int(re.compile(r'listRequisition.nbElements!\|!(\d+)').findall(response.text)[0])
-    if no_jobs>meta['requests']['post']['dropListSize']:
-        meta['requests']['post']['dropListSize'] = no_jobs
+    # if num_jobs>default in dropListSize, update post_data and call again with updated number
+    num_jobs = int(re.compile(r'listRequisition.nbElements!\|!(\d+)').findall(response.text)[0])
+    if num_jobs>meta['requests']['post']['dropListSize']:
+        meta['requests']['post']['dropListSize'] = num_jobs
         response = scrape_funcs.pull('post', url=meta['urls']['page'],
                                      headers=meta['requests']['headers'], data=meta['requests']['post'])
 

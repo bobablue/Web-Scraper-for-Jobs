@@ -39,7 +39,7 @@ def get_jobs():
         meta['requests']['json']['SearchCriteria'] = [{'CriterionName':i, 'CriterionValue':j}]
         response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], json=meta['requests']['json'])
 
-        # if no_jobs>default in CountItem, update json_data and call again with updated number
+        # if num_jobs>default in CountItem, update json_data and call again with updated number
         if response['SearchResult']['SearchResultCountAll']>meta['requests']['json']['SearchParameters']['CountItem']:
             meta['requests']['json']['SearchParameters']['CountItem'] = response['SearchResult']['SearchResultCountAll']
             response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], json=meta['requests']['json'])

@@ -47,10 +47,10 @@ def get_jobs():
     response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'],
                                  params=scrape_funcs.encode(meta['requests']['url'], meta['chars']))
 
-    # if no_jobs>default in RecordsPerPage, update meta['requests']['url'] and call again with updated number
-    no_jobs = int(BeautifulSoup(response['results'], 'html.parser').find('section')['data-total-results'])
-    if no_jobs>meta['requests']['url']['RecordsPerPage']:
-        meta['requests']['url']['RecordsPerPage'] = no_jobs
+    # if num_jobs>default in RecordsPerPage, update meta['requests']['url'] and call again with updated number
+    num_jobs = int(BeautifulSoup(response['results'], 'html.parser').find('section')['data-total-results'])
+    if num_jobs>meta['requests']['url']['RecordsPerPage']:
+        meta['requests']['url']['RecordsPerPage'] = num_jobs
         response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'],
                                      params=scrape_funcs.encode(meta['requests']['url'], meta['chars']))
 

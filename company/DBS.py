@@ -17,7 +17,6 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
                             'pageNo':1}}}
 
 #%% functions
-meta['requests']['json']
 #%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
@@ -40,9 +39,9 @@ def get_jobs():
     response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
                                  headers=meta['requests']['headers'], json=meta['requests']['json'])
 
-    no_jobs = response['pagingData']['totalCount']
+    num_jobs = response['pagingData']['totalCount']
     pagesize = response['pagingData']['pageSize']
-    pages = no_jobs//pagesize + (no_jobs % pagesize>0)
+    pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
     # parse first page
     jobs_dict = {}
