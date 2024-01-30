@@ -9,14 +9,14 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-        'chars':'%+'}
 
-# requests parameters
-url_params = {'RecordsPerPage':100,
-              'FacetFilters%5B0%5D.ID':1880251, # singapore
-              'FacetFilters%5B0%5D.FacetType':2,
-              'FacetFilters%5B0%5D.IsApplied':'true',
-              'SearchResultsModuleName':'Search+Results'}
+        'chars':'%+',
+
+        'requests':{'url':{'RecordsPerPage':100,
+                           'FacetFilters%5B0%5D.ID':1880251, # singapore
+                           'FacetFilters%5B0%5D.FacetType':2,
+                           'FacetFilters%5B0%5D.IsApplied':'true',
+                           'SearchResultsModuleName':'Search+Results'}}}
 
 #%% functions
 #%%
@@ -45,14 +45,14 @@ def jobs(soup_obj):
 @scrape_funcs.track_status(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'],
-                                 params=scrape_funcs.encode(url_params, meta['chars']))
+                                 params=scrape_funcs.encode(meta['requests']['url'], meta['chars']))
 
-    # if no_jobs>default in RecordsPerPage, update url_params and call again with updated number
+    # if no_jobs>default in RecordsPerPage, update meta['requests']['url'] and call again with updated number
     no_jobs = int(BeautifulSoup(response['results'], 'html.parser').find('section')['data-total-results'])
-    if no_jobs>url_params['RecordsPerPage']:
-        url_params['RecordsPerPage'] = no_jobs
+    if no_jobs>meta['requests']['url']['RecordsPerPage']:
+        meta['requests']['url']['RecordsPerPage'] = no_jobs
         response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'],
-                                     params=scrape_funcs.encode(url_params, meta['chars']))
+                                     params=scrape_funcs.encode(meta['requests']['url'], meta['chars']))
 
     bs_obj = BeautifulSoup(response['results'], 'html.parser').find(id='search-results-list')
     jobs_dict = {}

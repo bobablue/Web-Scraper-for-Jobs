@@ -7,14 +7,13 @@ if __name__=='__main__' and __package__ is None:
 from util import scrape_funcs, error_handling
 
 #%% static data
-meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0])}
+meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
 
-# requests parameters
-headers = {'tz':'GMT+08:00'}
+        'requests':{'headers':{'tz':'GMT+08:00'},
 
-# location:singapore; start from page 1
-json_data = {'filterSelectionParam':{'searchFilterSelections':[{'id':'LOCATION', 'selectedValues':['160422287']}]},
-             'pageNo':1}
+                    # location:singapore; start from page 1
+                    'json':{'filterSelectionParam':{'searchFilterSelections':[{'id':'LOCATION', 'selectedValues':['160422287']}]},
+                            'pageNo':1}}}
 
 #%% functions
 #%%
@@ -36,7 +35,8 @@ def jobs(json_dict):
 @scrape_funcs.track_status(__file__)
 def get_jobs():
     # get total number of jobs and pages to loop through and parse first page of results
-    response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'], headers=headers, json=json_data)
+    response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
+                                 headers=meta['requests']['headers'], json=meta['requests']['json'])
 
     no_jobs = response['pagingData']['totalCount']
     pagesize = response['pagingData']['pageSize']
@@ -49,8 +49,10 @@ def get_jobs():
 
     # compile jobs from all pages after first, into main dict
     for pg in range(2, pages+1):
-        json_data['pageNo'] = pg
-        response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'], headers=headers, json=json_data)
+        meta['requests']['json']['pageNo'] = pg
+        response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
+                                     headers=meta['requests']['headers'], json=meta['requests']['json'])
+
         for i in response['requisitionList']:
             jobs_dict.update(jobs(i))
 
