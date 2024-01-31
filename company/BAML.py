@@ -21,6 +21,8 @@ def jobs(json_obj):
         data_dict[meta['urls']['job']+i['jcrURL']] = {'Title':i['postingTitle'],
                                                       'Job Function':i['family'],
                                                       'Location':i['location']}
+
+    data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
 
 #%%

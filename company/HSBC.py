@@ -35,6 +35,7 @@ def jobs(soup_obj):
     for d in data:
         data_dict[d[0]] = {'Title':d[1], 'Location':d[2], 'Job Function':d[3]}
 
+    data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
 
 #%%

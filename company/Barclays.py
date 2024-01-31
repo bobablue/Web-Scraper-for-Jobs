@@ -27,6 +27,7 @@ def jobs(bs_obj):
         data_dict[meta['urls']['job']+i['href']]= {'Title':i.find('span', class_='job-jobtitle text--black').text,
                                                    'Location':i.find('span', class_='job-location text--black').text}
 
+    data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
 
 #%%
