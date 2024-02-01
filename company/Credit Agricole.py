@@ -31,7 +31,7 @@ def jobs(bs_obj):
         data_dict[d[0]] = {'Title':d[1], 'Location':d[2]}
     return(data_dict)
 
-#%% session_post = session.post(url=meta['urls']['cookie'], cookies=cookie, data=meta['requests']['post'])
+#%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
     # get cookie, and tokens to generate post_data
