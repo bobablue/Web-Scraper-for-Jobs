@@ -12,8 +12,6 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
         'requests':{'headers':{},
                     'json': {'searchKeywords':{'jobCountry':'Singapore'}}}}
 
-meta['requests']['headers']['Portal-Id'] = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['cookie'])['payload'][0]['portalId']
-
 #%% functions
 #%%
 @error_handling.data_error
@@ -29,6 +27,10 @@ def jobs(json_list):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
+    # get necessary tokens
+    meta['requests']['headers']['Portal-Id'] = scrape_funcs.pull('get', json_decode=True,
+                                                                 url=meta['urls']['cookie'])['payload'][0]['portalId']
+
     response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
                                  headers=meta['requests']['headers'], json=meta['requests']['json'])['payload']
 
