@@ -9,14 +9,15 @@ if __name__=='__main__' and __package__ is None:
 from util import scrape_funcs, error_handling
 
 #%% static data
-meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0])}
-meta['urls']['page'] = meta['urls']['page'].replace('/?','/?location=singapore&') # narrow search to singapore only
+meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+
+        'requests':{'url':{'location':['singapore']}}}
 
 #%% functions
 #%% parse beautifulsoup object into dict
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
-def extract_data(soup_obj):
+def jobs(soup_obj):
     data = soup_obj.find_all('tr', class_='data-row')
     data_dict = {}
     for no, i in enumerate(data):
@@ -29,7 +30,7 @@ def extract_data(soup_obj):
 #%% get total number of pages of career website and generate list of URLs for each page
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('get', url=meta['urls']['page'])
+    response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
     bs_text = BeautifulSoup(response.content, 'html.parser').find('caption').text
     results_per_pg = int(re.compile(r'Results \d+ to (\d+)').findall(bs_text)[0])
     pages = int(re.compile(r'Page \d+ of (\d+)').findall(bs_text)[0])
@@ -38,9 +39,9 @@ def get_jobs():
     # compile jobs from all pages into 1 dict
     jobs_dict = {}
     for pg in pages:
-        response = scrape_funcs.pull('get', url=pg)
+        response = scrape_funcs.pull('get', url=pg, params=meta['requests']['url'])
         bs_obj = BeautifulSoup(response.content, 'html.parser')
-        jobs_dict.update(extract_data(bs_obj))
+        jobs_dict.update(jobs(bs_obj))
     return(jobs_dict)
 
 #%%
