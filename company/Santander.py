@@ -11,7 +11,7 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 
         # 20 is limit
         'requests':{'job_max':20,
-                    'json':{'appliedFacets':{'locationCountry':['29247e57dbaf46fb855b224e03170bc7','dcc5b7608d8644b3a93716604e78e995','80938777cac5440fab50d729f9634969']},
+                    'json':{'appliedFacets':{'locationCountry':['80938777cac5440fab50d729f9634969']},
                             'offset':0}}}
 
 meta['requests']['json']['limit'] = meta['requests']['job_max']
