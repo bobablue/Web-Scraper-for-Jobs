@@ -39,7 +39,6 @@ def get_jobs():
     # compile jobs from all pages into 1 dict
     jobs_dict = {}
     for pg in pages:
-        print(pg)
         response = scrape_funcs.pull('get', url=pg, params=meta['requests']['url'])
         bs_obj = BeautifulSoup(response.content, 'html.parser')
         jobs_dict.update(jobs(bs_obj))

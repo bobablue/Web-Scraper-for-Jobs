@@ -52,7 +52,7 @@ jobs['dataframe'] = jobs['dataframe'][cols['jobs']].sort_values(by=['Company','L
 #%% filters
 #%% keyword filters on job titles, show latest
 jobs['keywords'] = ['analy','data','economi','model','python','risk','scien']
-jobs['exclude'] = ['intern','summer']
+jobs['exclude'] = ['intern','summer','graduate']
 
 jobs['filtered'] = jobs['dataframe'][jobs['dataframe']['Title'].str.lower().str.contains('|'.join(jobs['keywords']))]
 jobs['filtered'] = jobs['filtered'][~jobs['filtered']['Title'].str.lower().str.contains('|'.join(jobs['exclude']))]

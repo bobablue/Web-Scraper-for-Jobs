@@ -9,11 +9,8 @@ from util import scrape_funcs, error_handling
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
 
-        'requests':{'post':{'key':'',
-                            'categories':'', 'subCategories':'',
-                            'regions':'SINGAPORE',
+        'requests':{'post':{'regions':'SINGAPORE',
                             'language':'en',
-                            'channel':'group_official_site',
                             'pageSize':50, # 50 is max page size
                             'pageIndex':1}}}
 
