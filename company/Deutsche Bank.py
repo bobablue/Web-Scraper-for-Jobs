@@ -7,10 +7,11 @@ if __name__=='__main__' and __package__ is None:
 from util import scrape_funcs, error_handling
 
 #%% static data
-# 71:'United Kingdom', 189:'Singapore', 1628:'Frankfurt am Main', 1698:'Frankfurt'
+# PositionLocation.Country 71:'United Kingdom', 189:'Singapore'
+# PositionLocation.City 1628:'Frankfurt am Main', 1698:'Frankfurt'
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
 
-        'locations':{'PositionLocation.Country':[71, 189], 'PositionLocation.City':[1628, 1698]},
+        'locations':{'PositionLocation.Country':[189]},
 
         'requests':{'json':{'SearchParameters':{'CountItem':100,
                                                 'MatchedObjectDescriptor':['PositionID','PositionTitle','OrganizationName']},
