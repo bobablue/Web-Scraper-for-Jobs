@@ -35,9 +35,9 @@ def get_jobs():
     response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
                                  json=meta['requests']['json'], cookies=cookie)
 
-    no_jobs = response['refineSearch']['totalHits']
+    num_jobs = response['refineSearch']['totalHits']
     pagesize = response['refineSearch']['hits']
-    pages = no_jobs//pagesize + (no_jobs % pagesize>0)
+    pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
     # parse first page
     jobs_dict = {}

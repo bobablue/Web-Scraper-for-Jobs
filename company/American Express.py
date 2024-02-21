@@ -32,9 +32,9 @@ def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'],
                                  params=meta['requests']['url'], json_decode=True)
 
-    no_jobs = response['count']
+    num_jobs = response['count']
     pagesize = meta['requests']['url']['num']
-    pages = no_jobs//pagesize + (no_jobs % pagesize>0)
+    pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
     # parse first page
     jobs_dict = jobs(response['positions'])
