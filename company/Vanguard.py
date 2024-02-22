@@ -15,7 +15,7 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
         'requests':{'url':{'companyName':'companies/fbd5ce04-22d1-4aae-90dc-0282e45ee06f',
                            'callback':'jobsCallback',
                            'offset':0,
-                           'customAttributeFilter':'ats_portalid="WorkDay" AND country="US"'}}}
+                           'customAttributeFilter':'ats_portalid="WorkDay" AND country="SG"'}}}
 
 meta['requests']['url']['pageSize'] = meta['job_max']
 
