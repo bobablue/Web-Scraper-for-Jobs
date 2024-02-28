@@ -8,7 +8,6 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-        'chars':'[]',
         'job_max':100, # 500 is hard limit
 
         'requests':{'url':{'normalized_country_code[]':['SGP'],
