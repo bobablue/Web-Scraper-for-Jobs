@@ -21,9 +21,10 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
 def jobs(json_obj):
     data_dict = {}
-    data_dict[f"{meta['urls']['job']}{json_obj['jobId']}"] = {'Title':json_obj['title'],
-                                                              'Location':json_obj['country'],
-                                                              'Job Function':json_obj['subCategory']}
+    for i in json_obj:
+        data_dict[f"{meta['urls']['job']}{i['jobId']}"] = {'Title':i['title'],
+                                                           'Location':i['country'],
+                                                           'Job Function':i['category']}
     return(data_dict)
 
 #%%
@@ -39,10 +40,7 @@ def get_jobs():
     pagesize = response['refineSearch']['hits']
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # parse first page
-    jobs_dict = {}
-    for i in response['refineSearch']['data']['jobs']:
-        jobs_dict.update(jobs(i))
+    jobs_dict = jobs(response['refineSearch']['data']['jobs']) # parse first page
 
     # compile jobs from all pages after first, into main dict (update from in post_data)
     for pg in range(pages-1):
@@ -50,8 +48,7 @@ def get_jobs():
         response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
                                      json=meta['requests']['json'], cookies=cookie)
 
-        for i in response['refineSearch']['data']['jobs']:
-            jobs_dict.update(jobs(i))
+        jobs_dict.update(jobs(response['refineSearch']['data']['jobs']))
 
     return(jobs_dict)
 
