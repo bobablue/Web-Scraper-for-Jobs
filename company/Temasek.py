@@ -9,6 +9,7 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'locations':['singapore'],
 
         'requests':{'headers':{'viewid':'/ui/rcmcareer/pages/careersite/career.jsp.xhtml'},
 
@@ -48,6 +49,8 @@ def jobs(response_obj):
     for d in data:
         data_dict[d[0]] = {'Title':d[1], 'Location':d[2], 'Job Function':d[3]}
 
+    # restrict to singapore only
+    data_dict = {k:v for k,v in data_dict.items() if v['Location'].lower() in meta['locations']}
     return(data_dict)
 
 #%%
