@@ -24,13 +24,15 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 #%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
-def jobs(json_dict):
-    data_dict = {json_dict['Link']:{'Location':meta['requests']['location'][json_dict['localeId']]}}
+def jobs(json_obj):
+    data_dict = {}
+    for i in json_obj:
+        data_dict[i['Link']] = {'Location':meta['requests']['location'][i['localeId']]}
 
-    # every key in extract
-    for qn in json_dict['Questions']:
-        if qn['QuestionName'] in meta['requests']['extract']:
-            data_dict[json_dict['Link']].update({meta['requests']['extract'][qn['QuestionName']]:scrape_funcs.decode(qn['Value'].strip())})
+        # every key in extract
+        for qn in i['Questions']:
+            if qn['QuestionName'] in meta['requests']['extract']:
+                data_dict[i['Link']].update({meta['requests']['extract'][qn['QuestionName']]:scrape_funcs.decode(qn['Value'].strip())})
 
     return(data_dict)
 
@@ -43,7 +45,6 @@ def get_jobs():
     meta['requests']['headers'] = {'RFT':re.compile(r'RequestVerificationToken" type="hidden" value="(.*)"').findall(response.text)[0],
                                    'Cookie':'; '.join(f'{k}={v}' for k,v in response.cookies.get_dict().items())}
 
-    # get total number of jobs and pages to loop through and parse first page of results
     response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page_1'],
                                  headers=meta['requests']['headers'], data=meta['requests']['post'])
 
@@ -51,18 +52,15 @@ def get_jobs():
     pagesize = len(response['Jobs']['Job'])
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    jobs_dict = {}
-    for i in response['Jobs']['Job']:
-        jobs_dict.update(jobs(i))
+    jobs_dict = jobs(response['Jobs']['Job']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update pageNumber in post_data)
-    for pg in range(2, pages+1):
-        meta['requests']['post']['pageNumber'] = pg
+    # compile subsequent pages
+    for i in range(2,pages+1):
+        meta['requests']['post']['pageNumber'] = i
         response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page_n'],
                                      headers=meta['requests']['headers'], data=meta['requests']['post'])
 
-        for i in response['Jobs']['Job']:
-            jobs_dict.update(jobs(i))
+        jobs_dict.update(jobs(response['Jobs']['Job']))
 
     return(jobs_dict)
 

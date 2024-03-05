@@ -8,27 +8,32 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':50, # 50 is max page size
 
         'requests':{'post':{'regions':'SINGAPORE',
                             'language':'en',
-                            'pageSize':50, # 50 is max page size
+                            'pageSize':None,
                             'pageIndex':1}}}
+
+meta['requests']['post']['pageSize'] = meta['job_max']
 
 #%% functions
 #%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
 def jobs(json_obj):
-    # job function missing in some posts
-    if json_obj['categories'] is None:
-        job_func = ''
-    else:
-        job_func = ', '.join(json_obj['categories'])
-
     data_dict = {}
-    data_dict[meta['urls']['job']+str(json_obj['id'])] = {'Title':json_obj['name'],
-                                                          'Location':', '.join(json_obj['workLocations']),
-                                                          'Job Function':job_func}
+    for i in json_obj:
+
+        # job function missing in some posts
+        if i['categories'] is None:
+            job_func = ''
+        else:
+            job_func = ', '.join(i['categories'])
+
+        data_dict[meta['urls']['job']+str(i['id'])] = {'Title':i['name'],
+                                                       'Location':', '.join(i['workLocations']),
+                                                       'Job Function':job_func}
     return(data_dict)
 
 #%%
@@ -36,21 +41,17 @@ def jobs(json_obj):
 def get_jobs():
     response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['post'], json_decode=True)
 
-    jobs_dict = {}
-    for i in response['content']:
-        jobs_dict.update(jobs(i))
-
     num_jobs = response['totalCount']
     pagesize = response['pageSize']
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # compile jobs from all pages after first, into main dict (update post_data to include page number)
-    for pg in range(2, pages+1):
-        meta['requests']['post']['pageIndex'] = pg
-        response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['post'], json_decode=True)
+    jobs_dict = jobs(response['content']) # parse first page
 
-        for i in response['content']:
-            jobs_dict.update(jobs(i))
+    # compile subsequent pages
+    for i in range(2, pages+1):
+        meta['requests']['post']['pageIndex'] = i
+        response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['post'], json_decode=True)
+        jobs_dict.update(jobs(response['content']))
 
     return(jobs_dict)
 

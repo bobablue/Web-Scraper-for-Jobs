@@ -8,9 +8,11 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':10, # 10 is default pagesize and cannot be changed
 
-        # 10 is default pagesize and cannot be changed
-        'requests':{'url':{'location':'Singapore', 'domain':'aexp.com', 'start':0, 'num':10}}}
+        'requests':{'url':{'location':'Singapore', 'domain':'aexp.com', 'start':0, 'num':None}}}
+
+meta['requests']['url']['num'] = meta['job_max']
 
 #%% functions
 #%%
@@ -33,15 +35,14 @@ def get_jobs():
                                  params=meta['requests']['url'], json_decode=True)
 
     num_jobs = response['count']
-    pagesize = meta['requests']['url']['num']
+    pagesize = meta['job_max']
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # parse first page
-    jobs_dict = jobs(response['positions'])
+    jobs_dict = jobs(response['positions']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update start from in requests params)
-    for pg in range(1,pages):
-        meta['requests']['url']['start'] = (pg) * pagesize
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['url']['start'] = i * pagesize
         response = scrape_funcs.pull('get', url=meta['urls']['page'],
                                      params=meta['requests']['url'], json_decode=True)
 

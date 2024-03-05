@@ -8,7 +8,7 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-        'job_max':100, # 500 is hard limit
+        'job_max':100, # 100 is hard limit
 
         'requests':{'url':{'normalized_country_code[]':['SGP'],
                            'offset':0}}}
@@ -38,9 +38,9 @@ def get_jobs():
 
     jobs_dict = jobs(response['jobs']) # parse first page
 
-    # compile subsequent pages, if any
+    # compile subsequent pages
     for i in range(pages-1):
-        meta['requests']['url']['offset'] = meta['requests']['url']['offset'] + meta['job_max']
+        meta['requests']['url']['offset'] = meta['requests']['url']['offset'] + pagesize
         response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'], json_decode=True)
         jobs_dict.update(jobs(response['jobs']))
 

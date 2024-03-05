@@ -13,7 +13,7 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
         'requests':{'url':{'location':['singapore'], 'page-items':1000}}}
 
 #%% functions
-#%% parse beautifulsoup object into dict
+#%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
 def jobs(soup_obj):
@@ -39,8 +39,8 @@ def jobs(soup_obj):
 @scrape_funcs.track_status(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
-    bs_text = BeautifulSoup(response.content, 'html.parser')
-    jobs_dict = jobs(bs_text)
+    bs_obj = BeautifulSoup(response.content, 'html.parser')
+    jobs_dict = jobs(bs_obj)
     return(jobs_dict)
 
 #%%

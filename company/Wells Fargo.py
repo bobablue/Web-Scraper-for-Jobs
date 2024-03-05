@@ -10,10 +10,12 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':50, # 50 max
 
-        # 50 is max page size
-        'requests':{'url':{'country':['Singapore'], 'pagesize':50, 'page':1},
+        'requests':{'url':{'country':['Singapore'], 'pagesize':None, 'page':1},
                     'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0'}}}
+
+meta['requests']['url']['pagesize'] = meta['job_max']
 
 #%% functions
 #%%
@@ -40,21 +42,20 @@ def jobs(bs_obj):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    # get total number of jobs and pages to loop through and parse first page of results
     response = scrape_funcs.pull('get', url=meta['urls']['page'],
                                  params=meta['requests']['url'], headers=meta['requests']['headers'])
 
     bs_obj = BeautifulSoup(response.content, 'html.parser')
 
     num_jobs = int(re.findall(r'(\d+) matching jobs', bs_obj.find('p', class_='job-count').text)[0])
-    pages = num_jobs//meta['requests']['url']['pagesize'] + (num_jobs % meta['requests']['url']['pagesize']>0)
+    pagesize = meta['job_max']
+    pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    jobs_dict = {}
-    jobs_dict.update(jobs(bs_obj))
+    jobs_dict = jobs(bs_obj)
 
-    # loop through pages
-    for pg in range(2, pages+1):
-        meta['requests']['url']['page'] = pg
+    # compile subsequent pages
+    for i in range(2, pages+1):
+        meta['requests']['url']['page'] = i
         response = scrape_funcs.pull('get', url=meta['urls']['page'],
                                      params=meta['requests']['url'], headers=meta['requests']['headers'])
 

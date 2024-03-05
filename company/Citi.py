@@ -23,22 +23,18 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
 def jobs(soup_obj):
-    try:
-        data_dict = {meta['urls']['job']+soup_obj.find('a')['href']: {'Title':soup_obj.find('h2').text,
-                                                                      'Location':soup_obj.find('span', class_='job-location').text}}
+    data_dict = {}
+    soup_obj = soup_obj.find(id='search-results-list')
+    for i in soup_obj.find_all('li', class_=False):
+        try:
+            data_dict[meta['urls']['job']+i.find('a')['href']] = {'Title':i.find('h2').text,
+                                                                  'Location':i.find('span', class_='job-location').text}
 
-    # repeated 'a' html tag: 1st contains job data, 2nd is just "learn more" with no data
-    except (AttributeError, TypeError):
-        return(dict())
+        # repeated 'a' html tag: 1st contains job data, 2nd is just "learn more" with no data
+        except (AttributeError, TypeError):
+            pass
 
-    # clean up location string
-    for i,j in data_dict.items():
-        loc = ''.join(j['Location'].split())
-        loc = loc.split(',')
-        loc = set(i.lower() for i in loc)
-        if loc=={'singapore'}:
-            j['Location'] = 'Singapore'
-
+    data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
 
 #%%
@@ -54,11 +50,8 @@ def get_jobs():
         response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'],
                                      params=scrape_funcs.encode(meta['requests']['url'], meta['chars']))
 
-    bs_obj = BeautifulSoup(response['results'], 'html.parser').find(id='search-results-list')
-    jobs_dict = {}
-    for i in bs_obj.find_all('li', class_=False):
-        jobs_dict.update(jobs(i))
-
+    bs_obj = BeautifulSoup(response['results'], 'html.parser')
+    jobs_dict = jobs(bs_obj)
     return(jobs_dict)
 
 #%%

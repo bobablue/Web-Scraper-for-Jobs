@@ -43,8 +43,8 @@ def jobs(bs_obj):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('get', url=meta['urls']['page'], headers=meta['requests']['headers'],
-                                 params=meta['requests']['url'])
+    response = scrape_funcs.pull('get', url=meta['urls']['page'],
+                                 headers=meta['requests']['headers'], params=meta['requests']['url'])
 
     bs_obj = BeautifulSoup(response.content, 'html.parser')
 
@@ -57,8 +57,8 @@ def get_jobs():
 
     for i in range(2,pages+1):
         meta['requests']['url']['page'] = i
-        response = scrape_funcs.pull('get', url=meta['urls']['page'], headers=meta['requests']['headers'],
-                                     params=meta['requests']['url'])
+        response = scrape_funcs.pull('get', url=meta['urls']['page'],
+                                     headers=meta['requests']['headers'], params=meta['requests']['url'])
 
         bs_obj = BeautifulSoup(response.content, 'html.parser')
         jobs_dict.update(jobs(bs_obj))

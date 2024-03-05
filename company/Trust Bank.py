@@ -19,12 +19,12 @@ def jobs(bs_obj):
     for section in bs_obj.find_all('section'):
         dept = section.find('h3').text
         for job,location in zip(section.find_all('a'), section.find_all('span')):
-            data_dict[f"{meta['urls']['job']}{job['href']}"] = {'Title':job.text,
-                                                                'Job Function':dept,
-                                                                'Location':location.text}
+            data_dict[meta['urls']['job'] + job['href']] = {'Title':job.text,
+                                                            'Job Function':dept,
+                                                            'Location':location.text}
     return(data_dict)
 
-#%% get all jobs (not sure how the loop/next page structure is like)
+#%% not sure how the loop/next page structure is like
 @scrape_funcs.track_status(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'])

@@ -8,49 +8,55 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':250, # 250 is hard limit
 
-        'requests':{'finder':{'siteNumber':'CX_1', 'limit':None, 'locationId':'300000000229065'}, # singapore
-                    'url':{'expand':'requisitionList.secondaryLocations,flexFieldsFacet.values', 'finder':None}}}
+        'requests':{'post':{'operationName':'GetRoles',
+
+                            'variables':{'searchQueryInput':{'page':{'pageSize':None,'pageNumber':0},
+
+                                                             'filters':[{'filterCategoryType':'LOCATION',
+                                                                         'filters':[{'filter':'Singapore'}]}],
+
+                                                             'experiences':['PROFESSIONAL','EARLY_CAREER']}},
+
+                            'query':'query GetRoles($searchQueryInput: RoleSearchQueryInput!) {roleSearch(searchQueryInput: $searchQueryInput) {totalCount items {roleId jobTitle jobFunction locations {country} externalSource {sourceId}}}}'}}}
+
+meta['requests']['post']['variables']['searchQueryInput']['page']['pageSize'] = meta['job_max']
 
 #%% functions
 #%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
-def jobs(json_dict):
-    data_dict = {meta['urls']['job']+json_dict['Id']:{'Title':json_dict['Title'],
-                                                      'Location':json_dict['PrimaryLocation']}}
-
-    data_dict = scrape_funcs.clean_loc(data_dict)
+def jobs(json_obj):
+    data_dict = {}
+    for i in json_obj:
+        data_dict[meta['urls']['job'] + i['externalSource']['sourceId']] = {'Title':i['jobTitle'],
+                                                                            'Job Function':i['jobFunction'],
+                                                                            'Location':' | '.join([j['country'] for j in i['locations']])}
     return(data_dict)
 
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('get', json_decode=True,
-                                 url=meta['urls']['page'], params=meta['requests']['url'])['items'][0]
+    response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['post'], json_decode=True)
+    response = response['data']['roleSearch']
 
-    # if num_jobs>default in limit, update params and call again with updated number
-    num_jobs = response['TotalJobsCount']
-    if num_jobs>meta['requests']['finder']['limit']:
-        meta['requests']['finder'], meta['requests']['url'] = scrape_funcs.update_num_jobs(num_jobs,
-                                                                                           meta['requests']['finder'],
-                                                                                           meta['requests']['url'])
+    num_jobs = response['totalCount']
+    pagesize = meta['job_max']
+    pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-        response = scrape_funcs.pull('get', json_decode=True,
-                                     url=meta['urls']['page'], params=meta['requests']['url'])['items'][0]
+    jobs_dict = jobs(response['items']) # parse first page
 
-    jobs_dict = {}
-    for i in response['requisitionList']:
-        jobs_dict.update(jobs(i))
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['post']['variables']['searchQueryInput']['page']['pageNumber'] = i
+        response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['post'], json_decode=True)
+        response = response['data']['roleSearch']
+        jobs_dict.update(jobs(response['items']))
 
     return(jobs_dict)
 
 #%%
-# insert arbitrary number of jobs for initial get
-meta['requests']['finder'], meta['requests']['url'] = scrape_funcs.update_num_jobs(100,
-                                                                                   meta['requests']['finder'],
-                                                                                   meta['requests']['url'])
-
 if __name__=='__main__':
     jobs_dict = get_jobs()
     scrape_funcs.to_json(meta['urls']['company'], jobs_dict)

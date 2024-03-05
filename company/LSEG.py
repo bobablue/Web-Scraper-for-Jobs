@@ -46,9 +46,9 @@ def get_jobs():
 
     jobs_dict = jobs(response['jobPostings']) # compile first page
 
-    # compile jobs from all pages after first, into main dict (update offset number in meta['requests']['post'])
-    for pg in range(1, pages):
-        meta['requests']['json']['offset'] = pg * pagesize
+    # compile subsequent pages
+    for i in range(1, pages):
+        meta['requests']['json']['offset'] = i * pagesize
         response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['json'], json_decode=True)
         jobs_dict.update(jobs(response['jobPostings']))
 

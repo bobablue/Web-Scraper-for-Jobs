@@ -21,13 +21,12 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 def jobs(soup_obj):
     data = soup_obj.find_all('tr', class_='TableRow')
     data_dict = {}
-    for no, i in enumerate(data):
+    for i in data:
         job = i.find('a', class_='Link JobsListings__link')
         if job:
-            data_dict[f"{meta['urls']['job']}{job['href']}"] = {'Title':job.text,
-                                                                'Job Function':i.find('li', class_='List__item ListItem JobsListings__departmentsListItem').text.strip(),
-                                                                'Location':i.find('span', class_='JobsListings__locationDisplayName').text.strip()}
-
+            data_dict[meta['urls']['job'] + job['href']] = {'Title':job.text,
+                                                            'Job Function':i.find('li', class_='List__item ListItem JobsListings__departmentsListItem').text.strip(),
+                                                            'Location':i.find('span', class_='JobsListings__locationDisplayName').text.strip()}
     return(data_dict)
 
 #%%

@@ -10,6 +10,7 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+
         'requests':{'post':{'__VIEWSTATE':None,
                             '__VIEWSTATEGENERATOR':None,
                             '__EVENTVALIDATION':None,

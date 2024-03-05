@@ -20,11 +20,12 @@ meta['urls'].update({'country':'https://ats.workatsea.com/ats/api/v1/user/meta/s
 #%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
-def jobs(jobs_obj, countries_obj, depts_obj):
+def jobs(json_obj, countries_obj, depts_obj):
     data_dict = {}
-    data_dict[meta['urls']['job'].replace('job_id', jobs_obj['job_id'])] = {'Title':jobs_obj['job_name'],
-                                                                            'Location':countries_obj[jobs_obj['region_id']],
-                                                                            'Job Function':depts_obj[jobs_obj['department_id']]}
+    for i in json_obj:
+        data_dict[meta['urls']['job'].replace('job_id', i['job_id'])] = {'Title':i['job_name'],
+                                                                         'Location':countries_obj[i['region_id']],
+                                                                         'Job Function':depts_obj[i['department_id']]}
     return(data_dict)
 
 #%% mapping of id to countries
@@ -55,20 +56,15 @@ def get_jobs():
     countries = get_countries()
     depts = get_depts()
 
-    response = scrape_funcs.pull('get', json_decode=True,
-                                 url=meta['urls']['page'], params=meta['requests']['url']['jobs'])
+    response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], params=meta['requests']['url']['jobs'])
 
     # if num_jobs>default in limit, update and call again with updated limit
     num_jobs = response['data']['total_count']
     if num_jobs>meta['requests']['url']['jobs']['limit']:
         meta['requests']['url']['jobs']['limit'] = num_jobs
-        response = scrape_funcs.pull('get', json_decode=True,
-                                     url=meta['urls']['page'], params=meta['requests']['url']['jobs'])
+        response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], params=meta['requests']['url']['jobs'])
 
-    jobs_dict = {}
-    for i in response['data']['job_list']:
-        jobs_dict.update(jobs(i, countries, depts))
-
+    jobs_dict = jobs(response['data']['job_list'], countries, depts)
     return(jobs_dict)
 
 #%%

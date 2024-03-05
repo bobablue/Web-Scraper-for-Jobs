@@ -28,9 +28,10 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
 def jobs(json_obj):
     data_dict = {}
-    data_dict[json_obj['resulturl']] = {'Title':json_obj['title'],
-                                        'Job Function':json_obj['sourcestr10'],
-                                        'Location':json_obj['sourcecsv1']}
+    for i in json_obj:
+        data_dict[i['resulturl']] = {'Title':i['title'],
+                                     'Job Function':i['sourcestr10'],
+                                     'Location':i['sourcecsv1']}
     return(data_dict)
 
 #%%
@@ -54,10 +55,7 @@ def get_jobs():
         meta['requests']['json']['query']['skipCount'] = num_jobs
         response = scrape_funcs.pull('post', url=meta['urls']['page'], headers=headers, json=meta['requests']['json']).json()
 
-    jobs_dict = {}
-    for i in response['Result']['Docs']:
-        jobs_dict.update(jobs(i))
-
+    jobs_dict = jobs(response['Result']['Docs'])
     return(jobs_dict)
 
 #%%

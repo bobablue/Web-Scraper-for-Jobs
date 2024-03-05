@@ -19,10 +19,12 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 #%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
-def jobs(json_dict):
-    data_dict = {meta['urls']['job']+json_dict['contestNo']:{'Title':json_dict['column'][0].strip(),
-                                                             'Job Function':json_dict['column'][0].split(',')[-1].strip(),
-                                                             'Location':''.join([c for c in json_dict['column'][1] if c not in ['"','[',']']])}}
+def jobs(json_obj):
+    data_dict = {}
+    for i in json_obj:
+        data_dict[meta['urls']['job'] + i['contestNo']] = {'Title':i['column'][0].strip(),
+                                                           'Job Function':i['column'][0].split(',')[-1].strip(),
+                                                           'Location':''.join([c for c in i['column'][1] if c not in ['"','[',']']])}
 
     # if title does not contain function (i.e., title==job function), then leave job function blank
     for i,j in data_dict.items():
@@ -34,7 +36,6 @@ def jobs(json_dict):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    # get total number of jobs and pages to loop through and parse first page of results
     response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
                                  headers=meta['requests']['headers'], json=meta['requests']['json'])
 
@@ -42,19 +43,15 @@ def get_jobs():
     pagesize = response['pagingData']['pageSize']
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # parse first page
-    jobs_dict = {}
-    for i in response['requisitionList']:
-        jobs_dict.update(jobs(i))
+    jobs_dict = jobs(response['requisitionList']) # parse first page
 
-    # compile jobs from all pages after first, into main dict
-    for pg in range(2, pages+1):
-        meta['requests']['json']['pageNo'] = pg
+    # compile subsequent pages
+    for i in range(2, pages+1):
+        meta['requests']['json']['pageNo'] = i
         response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
                                      headers=meta['requests']['headers'], json=meta['requests']['json'])
 
-        for i in response['requisitionList']:
-            jobs_dict.update(jobs(i))
+        jobs_dict.update(jobs(response['requisitionList']))
 
     return(jobs_dict)
 
