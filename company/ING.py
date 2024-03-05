@@ -21,29 +21,26 @@ def jobs(bs_obj):
     data_dict = {}
     for d in data:
         data_dict[meta['urls']['job']+d.find('a')['href']] = {'Title':d.find('a').text,
-                                                              'Location':d.find(class_='meta-information').text.split(' | ')[-3],
+                                                              'Location':d.find(class_='meta-information').text.split(' | ')[-2],
                                                               'Job Function':d.find(class_='meta-information').text.split(' | ')[1]}
     return(data_dict)
 
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    # get total number of jobs and pages to loop through and parse first page of results
     response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
     bs_obj = BeautifulSoup(response.content, 'html.parser')
 
-    # parse first page
-    jobs_dict = {}
-    jobs_dict.update(jobs(bs_obj))
+    jobs_dict = jobs(bs_obj) # parse first page
 
     # pagesize calculated using number of jobs posted on first page, num_jobs can be <50 even if default is 50
     num_jobs = int(bs_obj.find_all('strong')[1].text)
     pagesize = len(jobs_dict)
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # compile jobs from all pages after first, into main dict (update start number in meta['requests']['url'])
-    for pg in range(1, pages):
-        meta['requests']['url']['start'] = pg*50
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['url']['start'] = i * pagesize
         response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
         bs_obj = BeautifulSoup(response.content, 'html.parser')
         jobs_dict.update(jobs(bs_obj))

@@ -8,12 +8,15 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':500,
 
         'requests':{'json':{'ddoKey':'refineSearch',
                             'from':0,
-                            'size':500,
+                            'size':None,
                             'jobs':'true',
                             'selected_fields':{'country':['Singapore']}}}}
+
+meta['requests']['json']['size'] = meta['job_max']
 
 #%% functions
 #%%
@@ -30,22 +33,18 @@ def jobs(data):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('post', url=meta['urls']['page'],
-                                 json_decode=True, json=meta['requests']['json'])
+    response = scrape_funcs.pull('post', url=meta['urls']['page'], json_decode=True, json=meta['requests']['json'])
 
     num_jobs = response['refineSearch']['totalHits']
-    pagesize = response['refineSearch']['hits']
+    pagesize = meta['job_max']
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # parse first page
-    jobs_dict = jobs(response['refineSearch']['data']['jobs'])
+    jobs_dict = jobs(response['refineSearch']['data']['jobs']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update from in post_data)
-    for pg in range(1,pages):
-        meta['requests']['json']['from'] = (pg) * pagesize
-        response = scrape_funcs.pull('post', url=meta['urls']['page'],
-                                     json_decode=True, json=meta['requests']['json'])
-
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['json']['from'] = i * pagesize
+        response = scrape_funcs.pull('post', url=meta['urls']['page'], json_decode=True, json=meta['requests']['json'])
         jobs_dict.update(jobs(response['refineSearch']['data']['jobs']))
 
     return(jobs_dict)

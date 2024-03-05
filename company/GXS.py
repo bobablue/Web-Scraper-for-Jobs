@@ -8,11 +8,13 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':20, # 20 is hard limit
 
-        # 20 is hard limit
-        'requests':{'post':{'limit':20, 'offset':0,
+        'requests':{'post':{'limit':None, 'offset':0,
                             'appliedFacets':{'locations':['6ebadd30518d011ed3a5ed8337780000',
                                                           'b9d1c4463c030100fcbea274454b0000']}}}}
+
+meta['requests']['post']['limit'] = meta['job_max']
 
 #%% functions
 #%%
@@ -35,19 +37,17 @@ def jobs(json_obj):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    # get total number of jobs and determine number of pages of career website
     response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'], json=meta['requests']['post'])
 
     num_jobs = response['total']
     pagesize = len(response['jobPostings'])
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # parse first page
-    jobs_dict = jobs(response['jobPostings'])
+    jobs_dict = jobs(response['jobPostings']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update offset number in meta['requests']['post'])
-    for pg in range(1, pages):
-        meta['requests']['post']['offset'] = pg * pagesize
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['post']['offset'] = i * pagesize
         response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'], json=meta['requests']['post'])
         jobs_dict.update(jobs(response['jobPostings']))
 

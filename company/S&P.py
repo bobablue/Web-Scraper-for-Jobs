@@ -30,8 +30,7 @@ def jobs(data):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('get', url=meta['urls']['page'],
-                                 params=meta['requests']['url'], json_decode=True)
+    response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'], json_decode=True)
 
     num_jobs = response['totalCount']
     pagesize = meta['job_max']
@@ -39,14 +38,11 @@ def get_jobs():
 
     jobs_dict = jobs(response['jobs']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update start from in requests params)
-    for pg in range(2,pages+1):
-        meta['requests']['url']['page'] = pg
-        response = scrape_funcs.pull('get', url=meta['urls']['page'],
-                                     params=meta['requests']['url'], json_decode=True)
-
+    # compile subsequent pages
+    for i in range(2,pages+1):
+        meta['requests']['url']['page'] = i
+        response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'], json_decode=True)
         jobs_dict.update(jobs(response['jobs']))
-        print(pg, len(jobs_dict))
 
     return(jobs_dict)
 

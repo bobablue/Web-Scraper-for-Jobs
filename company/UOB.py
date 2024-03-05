@@ -1,7 +1,7 @@
 import os
 import datetime
-import re
 from bs4 import BeautifulSoup
+import re
 
 # import custom scripts (https://stackoverflow.com/a/38455936)
 if __name__=='__main__' and __package__ is None:
@@ -20,11 +20,11 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 def jobs(soup_obj):
     data = soup_obj.find_all('tr', class_='data-row')
     data_dict = {}
-    for no, i in enumerate(data):
+    for i in data:
         job = i.find('a', class_='jobTitle-link')
-        data_dict[f"{meta['urls']['job']}{job['href']}"] = {'Title':job.text,
-                                                            'Job Function':i.find('span', class_='jobDepartment').text,
-                                                            'Location':i.find('span', class_='jobLocation').text.strip()}
+        data_dict[meta['urls']['job'] + job['href']] = {'Title':job.text,
+                                                        'Job Function':i.find('span', class_='jobDepartment').text,
+                                                        'Location':i.find('span', class_='jobLocation').text.strip()}
 
     data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
@@ -32,19 +32,20 @@ def jobs(soup_obj):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    # get total number of pages of career website and generate list of URLs for each page
     response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
-    bs_text = BeautifulSoup(response.content, 'html.parser').find('caption').text
-    results_per_pg = int(re.compile(r'Results \d+ to (\d+)').findall(bs_text)[0])
+    bs_obj = BeautifulSoup(response.content, 'html.parser')
 
-    pages_prefix = meta['urls']['page'] + ''.join([f'&{k}={v}' for k,v in meta['requests']['url'].items()])
-    pages = int(re.compile(r'Page \d+ of (\d+)').findall(bs_text)[0])
-    pages = [f'{pages_prefix}&startrow={i*results_per_pg}' for i in range(pages)]
+    results = bs_obj.find('span', class_='paginationLabel').text
+    num_jobs = int(re.search(r'of (\d+)', results).group(1))
+    pagesize = int(re.search(r'(\d+) of \d+', results).group(1))
+    pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # compile jobs from all pages into 1 dict
-    jobs_dict = {}
-    for pg in pages:
-        response = scrape_funcs.pull('get', url=pg)
+    jobs_dict = jobs(bs_obj) # parse first page
+
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['url']['startrow'] = i * pagesize
+        response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
         bs_obj = BeautifulSoup(response.content, 'html.parser')
         jobs_dict.update(jobs(bs_obj))
 

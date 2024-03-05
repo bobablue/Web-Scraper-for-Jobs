@@ -8,9 +8,11 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':10, # 10 default, cannot be changed
 
-        # 10 is default pagesize and cannot be changed
-        'requests':{'json':{'city':['Singapore'], 'from':0, 'size':10}}}
+        'requests':{'json':{'city':['Singapore'], 'from':0, 'size':None}}}
+
+meta['requests']['json']['size'] = meta['job_max']
 
 #%% functions
 #%%
@@ -27,22 +29,18 @@ def jobs(data):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('post', url=meta['urls']['page'],
-                                 json=meta['requests']['json'], json_decode=True)
+    response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['json'], json_decode=True)
 
     num_jobs = response['recordsMatched']
-    pagesize = response['pageSize']
+    pagesize = meta['job_max']
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # parse first page
-    jobs_dict = jobs(response['jobDetails'])
+    jobs_dict = jobs(response['jobDetails']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update start from in requests params)
-    for pg in range(1,pages):
-        meta['requests']['json']['from'] = (pg) * pagesize
-        response = scrape_funcs.pull('post', url=meta['urls']['page'],
-                                     json=meta['requests']['json'], json_decode=True)
-
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['json']['from'] = i * pagesize
+        response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['json'], json_decode=True)
         jobs_dict.update(jobs(response['jobDetails']))
 
     return(jobs_dict)

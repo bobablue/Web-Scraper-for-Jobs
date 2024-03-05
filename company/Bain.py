@@ -44,6 +44,8 @@ def get_jobs():
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
     jobs_dict = jobs(bs_obj) # parse fist page
+
+    # compile subsequent pages
     for i in range(1,pages):
         meta['requests']['url']['folderOffset'] = pagesize * i
         response = scrape_funcs.pull('get', url=meta['urls']['page'],

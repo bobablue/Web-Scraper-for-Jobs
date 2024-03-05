@@ -10,7 +10,6 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-        'job_max':20, # default, unable to change
 
         'requests':{'url':{'locationsearch':'singapore', 'startrow':0}}}
 
@@ -38,13 +37,17 @@ def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
     bs_obj = BeautifulSoup(response.content, 'html.parser')
 
-    num_jobs = bs_obj.find('span', class_='paginationLabel').text.strip()
-    num_jobs = int(re.search(r'of (\d+)', num_jobs).group(1))
-    pagesize = meta['job_max']
+    if 'currently no open position' in bs_obj.text:
+        return({})
+
+    results = bs_obj.find('span', class_='paginationLabel').text
+    num_jobs = int(re.search(r'of (\d+)', results).group(1))
+    pagesize = int(re.search(r'(\d+) of \d+', results).group(1))
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
     jobs_dict = jobs(bs_obj) # parse first page
 
+    # compile subsequent pages
     for i in range(1,pages):
         meta['requests']['url']['startrow'] = i * pagesize
         response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])

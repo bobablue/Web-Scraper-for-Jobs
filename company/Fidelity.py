@@ -37,9 +37,9 @@ def get_jobs():
 
     jobs_dict = jobs(response['jobPostings']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update post_data to include page number)
-    for pg in range(1, pages):
-        meta['requests']['post']['offset'] = pg * pagesize
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['post']['offset'] = i * pagesize
         response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['post'], json_decode=True)
         jobs_dict.update(jobs(response['jobPostings']))
 
@@ -48,4 +48,4 @@ def get_jobs():
 #%%
 if __name__=='__main__':
     jobs_dict = get_jobs()
-    scrape_funcs.to_json(meta['urls']['company'], jobs_dict)
+    sscrape_funcs.to_json(meta['urls']['company'], jobs_dict)

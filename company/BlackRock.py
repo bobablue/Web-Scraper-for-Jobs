@@ -43,9 +43,9 @@ def get_jobs():
 
     jobs_dict = jobs(json_obj['queryResult']) # parse first page
 
-    # compile subsequent pages, if any
+    # compile subsequent pages
     for i in range(pages-1):
-        meta['requests']['url']['offset'] = meta['requests']['url']['offset'] + meta['job_max']
+        meta['requests']['url']['offset'] = meta['requests']['url']['offset'] + pagesize
         response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
         idx = {'start':response.text.find('('), 'end':response.text.rfind(')')}
         json_obj = json.loads(response.text[idx['start']+1:idx['end']])

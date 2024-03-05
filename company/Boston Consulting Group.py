@@ -8,12 +8,15 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':500,
 
         'requests':{'json':{'ddoKey':'refineSearch',
                             'from':0,
-                            'size':500,
+                            'size':None,
                             'jobs':'true',
                             'selected_fields':{'country':['Singapore']}}}}
+
+meta['requests']['json']['size'] = meta['job_max']
 
 #%% functions
 #%%
@@ -32,7 +35,6 @@ def jobs(json_obj):
 def get_jobs():
     cookie = scrape_funcs.pull('get', url=meta['urls']['cookie']).cookies.get_dict()
 
-    # get first batch of jobs (max 500 per call)
     response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
                                  json=meta['requests']['json'], cookies=cookie)
 
@@ -42,9 +44,9 @@ def get_jobs():
 
     jobs_dict = jobs(response['refineSearch']['data']['jobs']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update from in post_data)
-    for pg in range(pages-1):
-        meta['requests']['json']['from'] = (pg+1) * pagesize
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['json']['from'] = i * pagesize
         response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page'],
                                      json=meta['requests']['json'], cookies=cookie)
 

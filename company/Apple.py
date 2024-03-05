@@ -47,7 +47,7 @@ def get_jobs():
 
     jobs_dict = jobs(bs_obj) # parse first page
 
-    # parse all subsequent pages, if any
+    # compile subsequent pages
     for i in range(2, pages+1):
         meta['requests']['url']['page'] = i
         response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])

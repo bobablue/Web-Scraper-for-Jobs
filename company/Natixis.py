@@ -8,11 +8,11 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':1000,
 
-        'requests':{'job_max':1000,
-                    'json':{'lang':'en', 'tax_country':'singapore-en', 'from':0}}}
+        'requests':{'json':{'lang':'en', 'tax_country':'singapore-en', 'from':0, 'size':None}}}
 
-meta['requests']['json']['size'] = meta['requests']['job_max']
+meta['requests']['json']['size'] = meta['job_max']
 
 #%% functions
 #%%
@@ -33,7 +33,7 @@ def get_jobs():
 
     # assume num_jobs would not be >1,000, but check just in case
     num_jobs = response['data']['total']
-    if num_jobs>meta['requests']['job_max']:
+    if num_jobs>meta['job_max']:
         raise ValueError(f"Number of posted jobs greater than defined max: {num_jobs}\nCheck how to pull all")
 
     jobs_dict = jobs(response['data']['items'])

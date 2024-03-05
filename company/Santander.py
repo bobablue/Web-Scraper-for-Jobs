@@ -8,13 +8,11 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':20, # 20 is limit
 
-        # 20 is limit
-        'requests':{'job_max':20,
-                    'json':{'appliedFacets':{'locationCountry':['80938777cac5440fab50d729f9634969']},
-                            'offset':0}}}
+        'requests':{'json':{'appliedFacets':{'locationCountry':['80938777cac5440fab50d729f9634969']}, 'offset':0}}}
 
-meta['requests']['json']['limit'] = meta['requests']['job_max']
+meta['requests']['json']['limit'] = meta['job_max']
 
 #%% functions
 #%%
@@ -23,8 +21,7 @@ meta['requests']['json']['limit'] = meta['requests']['job_max']
 def jobs(data):
     data_dict = {}
     for i in data:
-        data_dict[meta['urls']['job']+i['externalPath']] = {'Title':i['title'],
-                                                            'Location':i['locationsText']}
+        data_dict[meta['urls']['job']+i['externalPath']] = {'Title':i['title'], 'Location':i['locationsText']}
     return(data_dict)
 
 #%%
@@ -33,14 +30,14 @@ def get_jobs():
     response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['json'], json_decode=True)
 
     num_jobs = response['total']
-    pagesize = meta['requests']['job_max']
+    pagesize = meta['job_max']
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
     jobs_dict = jobs(response['jobPostings']) # parse first page
 
-    # compile jobs from all pages after first, into main dict
-    for pg in range(1, pages):
-        meta['requests']['json']['offset'] = pg * meta['requests']['job_max']
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['json']['offset'] = i * pagesize
         response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['json'], json_decode=True)
         jobs_dict.update(jobs(response['jobPostings']))
 

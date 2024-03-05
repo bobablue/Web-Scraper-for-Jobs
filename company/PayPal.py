@@ -8,9 +8,11 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':10, # 10 is default pagesize and cannot be changed
 
-        # 10 is default pagesize and cannot be changed
-        'requests':{'url':{'location':'Singapore', 'domain':'paypal.com', 'start':0, 'num':10}}}
+        'requests':{'url':{'location':'Singapore', 'domain':'paypal.com', 'start':0, 'num':None}}}
+
+meta['requests']['url']['num'] = meta['job_max']
 
 #%% functions
 #%%
@@ -19,30 +21,24 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 def jobs(data):
     data_dict = {}
     for i in data:
-        data_dict[i['canonicalPositionUrl']] = {'Title':i['name'],
-                                                'Job Function':i['department'],
-                                                'Location':i['location']}
+        data_dict[i['canonicalPositionUrl']] = {'Title':i['name'], 'Job Function':i['department'], 'Location':i['location']}
     return(data_dict)
 
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('get', url=meta['urls']['page'],
-                                 params=meta['requests']['url'], json_decode=True)
+    response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'], json_decode=True)
 
     num_jobs = response['count']
-    pagesize = meta['requests']['url']['num']
+    pagesize = meta['job_max']
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # parse first page
-    jobs_dict = jobs(response['positions'])
+    jobs_dict = jobs(response['positions']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update start from in requests params)
-    for pg in range(1,pages):
-        meta['requests']['url']['start'] = (pg) * pagesize
-        response = scrape_funcs.pull('get', url=meta['urls']['page'],
-                                     params=meta['requests']['url'], json_decode=True)
-
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['url']['start'] = i * pagesize
+        response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'], json_decode=True)
         jobs_dict.update(jobs(response['positions']))
 
     return(jobs_dict)

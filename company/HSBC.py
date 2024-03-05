@@ -10,11 +10,13 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'job_max':50, # 50 records per page is hard limit
 
-        # 50 records per page is hard limit
         'requests':{'url':{'1017':'[67209]', '1017_format':812,
                            'listFilterMode':1,
-                           'pipelineRecordsPerPage':50, 'pipelineOffset':0}}}
+                           'pipelineRecordsPerPage':None, 'pipelineOffset':0}}}
+
+meta['requests']['url']['pipelineRecordsPerPage'] = meta['job_max']
 
 #%% functions
 #%%
@@ -41,21 +43,19 @@ def jobs(soup_obj):
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    # get total number of jobs and determine number of pages of career website
     response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
     bs_obj = BeautifulSoup(response.content, 'html.parser')
 
     num_jobs = ' '.join(bs_obj.find_all('div', class_='list-controls__text__legend')[0].text.split())
     num_jobs = int(re.compile(r'(\d*)\+? results').findall(num_jobs)[0])
-    pages = num_jobs//meta['requests']['url']['pipelineRecordsPerPage'] + (num_jobs % meta['requests']['url']['pipelineRecordsPerPage']>0)
+    pagesize = meta['job_max']
+    pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    # parse first page
-    jobs_dict = {}
-    jobs_dict.update(jobs(bs_obj))
+    jobs_dict = jobs(bs_obj) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update meta['requests']['url'] pipelineOffset)
-    for pg in range(pages-1):
-        meta['requests']['url']['pipelineOffset'] = (pg+1) * meta['requests']['url']['pipelineRecordsPerPage']
+    # compile subsequent pages
+    for i in range(1,pages):
+        meta['requests']['url']['pipelineOffset'] = i * pagesize
         response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
         bs_obj = BeautifulSoup(response.content, 'html.parser')
         jobs_dict.update(jobs(bs_obj))

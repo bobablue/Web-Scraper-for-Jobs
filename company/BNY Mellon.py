@@ -17,32 +17,30 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
 def jobs(json_obj):
     data_dict = {}
-    data_dict[meta['urls']['job']+str(json_obj['id'])] = {'Title':json_obj['name'],
-                                                          'Location':json_obj['location'],
-                                                          'Job Function':json_obj['department']}
+    for i in json_obj:
+        data_dict[meta['urls']['job']+str(i['id'])] = {'Title':i['name'],
+                                                       'Location':i['location'],
+                                                       'Job Function':i['department']}
+
+    data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
 
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
-    # get total number of jobs and pages to loop through and parse first page of results
-    response = scrape_funcs.pull('get', json_decode=True,
-                                 url=meta['urls']['page'], params=meta['requests']['url'])
+    response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], params=meta['requests']['url'])
 
     num_jobs = response['count']
     pagesize = len(response['positions'])
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    jobs_dict = {}
-    for i in response['positions']:
-        jobs_dict.update(jobs(i))
+    jobs_dict = jobs(response['positions']) # parse first page
 
-    # compile jobs from all pages after first, into main dict (update start number in meta['requests']['url'])
-    for pg in range(2, pages+1):
-        meta['requests']['url']['start'] = (pg-1) * 10
+    # compile subsequent pages
+    for i in range(1, pages):
+        meta['requests']['url']['start'] = i * 10
         response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], params=meta['requests']['url'])
-        for i in response['positions']:
-            jobs_dict.update(jobs(i))
+        jobs_dict.update(jobs(response['positions']))
 
     return(jobs_dict)
 

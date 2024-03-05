@@ -21,15 +21,13 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 #%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
-def extract_data(json_obj):
+def jobs(json_obj):
     key = 'MatchedObjectDescriptor'
     data = [i[key] for i in json_obj['SearchResult']['SearchResultItems'] if key in i]
     data_dict = {}
-
     for d in data:
         data_dict[meta['urls']['job'] + d['PositionID']] = {'Title':scrape_funcs.decode(d['PositionTitle']),
                                                             'Location':d['OrganizationName']}
-
     return(data_dict)
 
 #%%
@@ -45,7 +43,7 @@ def get_jobs():
             meta['requests']['json']['SearchParameters']['CountItem'] = response['SearchResult']['SearchResultCountAll']
             response = scrape_funcs.pull('get', json_decode=True, url=meta['urls']['page'], json=meta['requests']['json'])
 
-        jobs_dict.update(extract_data(response))
+        jobs_dict.update(jobs(response))
     return(jobs_dict)
 
 #%%
