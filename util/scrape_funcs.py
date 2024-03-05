@@ -20,7 +20,7 @@ def track_status(script_name):
         def wrapper(*args, **kwargs):
             module_name = os.path.splitext(os.path.basename(script_name))[0]
             output = func(*args, **kwargs)
-            print(f"[{module_name}] done")
+            print(f"[{module_name}] {len(output)}")
             return(output)
         return(wrapper)
     return(inner)
