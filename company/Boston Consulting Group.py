@@ -25,9 +25,9 @@ meta['requests']['json']['size'] = meta['job_max']
 def jobs(json_obj):
     data_dict = {}
     for i in json_obj:
-        data_dict[f"{meta['urls']['job']}{i['jobId']}"] = {'Title':i['title'],
-                                                           'Location':i['country'],
-                                                           'Job Function':i['category']}
+        data_dict[meta['urls']['job'] + i['jobId']] = {'Title':i['title'],
+                                                       'Location':i['country'],
+                                                       'Job Function':i['category']}
     return(data_dict)
 
 #%%

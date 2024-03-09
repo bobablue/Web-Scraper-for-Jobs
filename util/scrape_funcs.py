@@ -76,7 +76,7 @@ def clean_loc(data_dict):
         loc = ''.join(j['Location'].split())
         loc = loc.split(',')
         loc = set(i.lower() for i in loc)
-        if loc=={'singapore'}:
+        if loc.issubset({'sg','singapore'}):
             j['Location'] = 'Singapore'
     return(data_dict)
 

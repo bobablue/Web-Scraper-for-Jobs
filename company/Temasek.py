@@ -34,7 +34,7 @@ def jobs(response_obj):
                 'descriptors':re.compile(r'shortVal="(.*)"')}
 
     # extract data fields in list type from response object
-    urls = [f"{meta['urls']['job']}{url}" for url in patterns['url'].findall(response_obj)]
+    urls = [meta['urls']['job'] + url for url in patterns['url'].findall(response_obj)]
     titles = patterns['title'].findall(response_obj)
     location = patterns['descriptors'].findall(response_obj)[0::4]
     jobfunc = patterns['descriptors'].findall(response_obj)[1::4]

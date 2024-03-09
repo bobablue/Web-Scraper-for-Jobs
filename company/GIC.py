@@ -22,9 +22,11 @@ def jobs(soup_obj):
     data_dict = {}
     for i in data:
         job = i.find('a', class_='jobTitle-link')
-        data_dict[f"{meta['urls']['job']}{job['href']}"] = {'Title':job.text,
-                                                            'Job Function':i.find('span', class_='jobDepartment').text,
-                                                            'Location':i.find('span', class_='jobLocation').text.strip()}
+        data_dict[meta['urls']['job'] + job['href']] = {'Title':job.text,
+                                                        'Job Function':i.find('span', class_='jobDepartment').text,
+                                                        'Location':i.find('span', class_='jobLocation').text.strip()}
+
+    data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
 
 #%%
