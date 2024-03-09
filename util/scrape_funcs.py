@@ -75,7 +75,7 @@ def clean_loc(data_dict):
     for i,j in data_dict.items():
         loc = ''.join(j['Location'].split())
         loc = loc.split(',')
-        loc = set(i.lower() for i in loc)
+        loc = set(i.lower() for i in loc if not i.isdigit()) # remove postal codes if present
         if loc.issubset({'sg','singapore'}):
             j['Location'] = 'Singapore'
     return(data_dict)
