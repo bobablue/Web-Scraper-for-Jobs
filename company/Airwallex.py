@@ -8,35 +8,28 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-
-        'country':['SG']}
+        'locations':['singapore']}
 
 #%% functions
 #%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
-def jobs(data):
-    data_dict = [i for i in data if any(i['title'].startswith(x) for x in meta['country'])]
-    data_dict = {i['title'].split(' - ')[-1]:i['postings'] for i in data_dict}
+def jobs(json_obj):
+    data_dict = {}
+    for i in json_obj:
+        data_dict[i['jobUrl']] = {'Title':i['title'],
+                                  'Job Function':i['team'],
+                                  'Location':i['address']['postalAddress']['addressCountry']}
 
-    jobs_dict = {}
-    for cty,job_list in data_dict.items():
-        for job in job_list:
-
-            if 'department' in job['categories'].keys():
-                job_func = f"{job['categories']['department']}: {job['categories']['team']}"
-            else:
-                job_func = ''
-
-            jobs_dict[job['hostedUrl']] = {'Title':job['text'], 'Job Function':job_func, 'Location':cty}
-
-    return(jobs_dict)
+    # restrict to singapore only
+    data_dict = {k:v for k,v in data_dict.items() if v['Location'].lower() in meta['locations']}
+    return(data_dict)
 
 #%%
 @scrape_funcs.track_status(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'], json_decode=True)
-    jobs_dict = jobs(response)
+    jobs_dict = jobs(response['jobs'])
     return(jobs_dict)
 
 #%%
