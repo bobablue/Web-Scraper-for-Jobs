@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import types
 
 import company
+import util
 
 #%% static data
 folders = {'company':'company', 'archive':'archive'}
@@ -48,6 +49,13 @@ jobs['dataframe'] = pd.DataFrame.from_dict({v1:jobs['dict'][k1][v1] for k1 in jo
 
 jobs['dataframe'] = jobs['dataframe'].reset_index().rename(columns={'index':'URL'})
 jobs['dataframe'] = jobs['dataframe'][cols['jobs']].sort_values(by=['Company','Location','Title']).reset_index(drop=True)
+
+#%% sample check if job URLs are valid. if status is 404, API has probably changed, so code needs an update.
+status = {'all':util.check_urls.run_checks(jobs['dataframe'])}
+status['errors'] = status['all'][status['all']['Status']!=200]
+status['errors'] = dict(zip(status['errors']['Company'], status['errors']['Status']))
+if status['errors']:
+    print('URL errors:', status['errors'])
 
 #%% filters
 #%% keyword filters on job titles, show latest
