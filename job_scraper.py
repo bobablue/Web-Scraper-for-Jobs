@@ -48,7 +48,8 @@ jobs['dataframe'] = pd.DataFrame.from_dict({v1:jobs['dict'][k1][v1] for k1 in jo
                                            orient='index')
 
 jobs['dataframe'] = jobs['dataframe'].reset_index().rename(columns={'index':'URL'})
-jobs['dataframe'] = jobs['dataframe'][cols['jobs']].sort_values(by=['Company','Location','Title']).reset_index(drop=True)
+jobs['dataframe'] = jobs['dataframe'][cols['jobs']].sort_values(by=['Company','Location','Title'], key=lambda x:x.str.lower())
+jobs['dataframe'] = jobs['dataframe'].reset_index(drop=True)
 
 #%% sample check if job URLs are valid. if status is 404, API has probably changed, so code needs an update.
 status = {'all':util.check_urls.run_checks(jobs['dataframe'])}
