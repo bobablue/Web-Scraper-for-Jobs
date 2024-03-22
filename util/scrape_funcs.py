@@ -73,7 +73,8 @@ def decode(str_obj):
 #%% clean up location string
 def clean_loc(data_dict):
     for i,j in data_dict.items():
-        loc = ''.join(j['Location'].split())
+        loc = j['Location'].replace('-',',')
+        loc = ''.join(loc.split())
         loc = loc.split(',')
         loc = set(i.lower() for i in loc if not i.isdigit()) # remove postal codes if present
         if loc.issubset({'sg','singapore'}):
