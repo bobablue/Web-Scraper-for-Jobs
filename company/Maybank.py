@@ -25,7 +25,7 @@ def jobs(json_list):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     # get necessary tokens
     meta['requests']['headers']['Portal-Id'] = scrape_funcs.pull('get', json_decode=True,

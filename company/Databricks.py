@@ -38,7 +38,7 @@ def jobs(json_obj):
     return(jobs_filtered)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'], json_decode=True)
     jobs_dict = jobs(response)

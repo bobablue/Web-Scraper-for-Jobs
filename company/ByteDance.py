@@ -32,7 +32,7 @@ def jobs(json_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     # get token and update cookie and headers data
     token = scrape_funcs.pull('post', url=meta['urls']['cookie'], json_decode=True)

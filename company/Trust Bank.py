@@ -25,7 +25,7 @@ def jobs(bs_obj):
     return(data_dict)
 
 #%% not sure how the loop/next page structure is like
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'])
     bs_obj = BeautifulSoup(response.content, 'html.parser')

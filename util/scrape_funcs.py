@@ -15,7 +15,7 @@ def get_urls(filepath, company_name):
     return(urls)
 
 #%%
-def track_status(script_name):
+def num_jobs(script_name):
     def inner(func):
         def wrapper(*args, **kwargs):
             module_name = os.path.splitext(os.path.basename(script_name))[0]

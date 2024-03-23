@@ -29,7 +29,7 @@ def jobs(json_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     # get tokens
     # when request too many times in short period, 'get' loads a login page instead of the portal html

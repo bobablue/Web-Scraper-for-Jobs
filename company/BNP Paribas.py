@@ -39,7 +39,7 @@ def jobs(bs_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     # get total number of jobs and pages to loop through and parse first page of results
     response = scrape_funcs.pull('get', url=meta['urls']['page'],

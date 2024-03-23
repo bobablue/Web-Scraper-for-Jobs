@@ -35,7 +35,7 @@ def jobs(json_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     # get cookie and access token
     cookie = scrape_funcs.pull('post', url=meta['urls']['page'],

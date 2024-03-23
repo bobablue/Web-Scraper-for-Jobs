@@ -37,7 +37,7 @@ def jobs(json_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     # get RFT token and cookie to generate headers
     response = scrape_funcs.pull('post', url=meta['urls']['cookie'], params=meta['requests']['cookie'])

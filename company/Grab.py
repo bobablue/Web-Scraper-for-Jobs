@@ -25,7 +25,7 @@ def jobs(soup_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     jobs_dict = {}
 

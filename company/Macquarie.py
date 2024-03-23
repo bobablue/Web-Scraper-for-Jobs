@@ -36,7 +36,7 @@ def jobs(soup_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
     bs_obj = BeautifulSoup(response.content, 'html.parser')

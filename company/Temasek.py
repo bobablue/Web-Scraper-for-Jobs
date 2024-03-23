@@ -54,7 +54,7 @@ def jobs(response_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     # get cookie, ajax token, and sessionid (https://stackoverflow.com/a/69595627)
     cookie = scrape_funcs.pull('post', url=meta['urls']['cookie'])

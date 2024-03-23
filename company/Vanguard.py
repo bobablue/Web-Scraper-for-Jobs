@@ -31,7 +31,7 @@ def jobs(json_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     # response loads a JSONP object, so need to remove padding
     response = scrape_funcs.pull('get', url=meta['urls']['page'],

@@ -8,7 +8,7 @@ if __name__=='__main__' and __package__ is None:
     os.sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from util import scrape_funcs, error_handling
 
-#%% static data 'trk':'job-results_see-all-jobs-link',
+#%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
         'job_max':25,
 
@@ -17,11 +17,8 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
                                'Accept-Language':'en-US,en;q=0.5',
                                'Accept-Encoding':'gzip, deflate, br'},
 
-                    'url':{'f_C':'1337',
-                           'location':'Singapore',
-                           'position':1,
-                           'pageNum':0,
-                           'start':0}}}
+                    'url':{'f_C':'1337', 'location':'Singapore',
+                           'position':1, 'pageNum':0, 'start':0}}}
 
 #%% functions
 #%%
@@ -46,7 +43,7 @@ def jobs(soup_obj):
     return(data_dict)
 
 #%%
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
 
     # prone to 429 errors, so try 3 times

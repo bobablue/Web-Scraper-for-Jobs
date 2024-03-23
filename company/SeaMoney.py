@@ -51,7 +51,7 @@ def get_depts():
     return(depts)
 
 #%% get all jobs
-@scrape_funcs.track_status(__file__)
+@scrape_funcs.num_jobs(__file__)
 def get_jobs():
     countries = get_countries()
     depts = get_depts()
