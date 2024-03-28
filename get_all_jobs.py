@@ -4,21 +4,13 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 import types
 
-import gspread
-from google.oauth2.service_account import Credentials
-
 import company
-from util import check_urls, scrape_funcs
+from util import check_urls, g_sheets, scrape_funcs
 
 #%% static data
 folders = {'company':'company', 'archive':'archive'}
-files = {'export':'Job Opportunities_{date}.xlsx'}
+files = {'export':'Job Opportunities_{date}.xlsx', 'g_sheets_key':r'config/gsheets_key.json'}
 cols = {'jobs':['Company', 'Title', 'URL', 'Location', 'Job Function', 'Date Scraped']}
-
-# variables for google sheets API
-gsheets = {'scope':['https://www.googleapis.com/auth/spreadsheets','https://www.googleapis.com/auth/drive']}
-gsheets['credentials'] = Credentials.from_service_account_file(r'config/gsheets_key.json', scopes=gsheets['scope'])
-gsheets['auth'] = gspread.authorize(gsheets['credentials'])
 
 #%% functions
 #%% parallel requests
@@ -67,14 +59,5 @@ if os.path.isfile(i:=files['export'].replace('_{date}','')):
 #%% export data locally and to google sheets
 scrape_funcs.save_xlsx({'All':jobs['dataframe']}, files['export'].replace('_{date}', ''))
 
-# google sheets
-gsheets['wb'] = gsheets['auth'].open_by_key('1NuJjghe752QkHOe92w3OtQs6wfO0e74l_HQxZkW9YSs')
-
-gsheets['dataframe'] = jobs['dataframe'].copy().fillna('')
-gsheets['dataframe']['Date Scraped'] = gsheets['dataframe']['Date Scraped'].dt.strftime('%Y-%m-%d %H:%M:%S')
-
-# https://docs.gspread.org/en/latest/api/models/worksheet.html#gspread.worksheet.Worksheet.update
-gsheets['All'] = gsheets['wb'].worksheet('All')
-gsheets['All'].clear()
-gsheets['All'].update(range_name='',
-                      values=[gsheets['dataframe'].columns.values.tolist()] + gsheets['dataframe'].values.tolist())
+g_sheets.auth(files['g_sheets_key'])
+g_sheets.update(df=jobs['dataframe'], g_sheet_key='1NuJjghe752QkHOe92w3OtQs6wfO0e74l_HQxZkW9YSs')
