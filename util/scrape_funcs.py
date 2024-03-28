@@ -85,3 +85,11 @@ def clean_loc(data_dict):
 def to_json(co_name, jobs_dict):
     with open(f'{co_name}.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(jobs_dict, ensure_ascii=False, indent=4, sort_keys=True, default=str))
+
+#%% save a list of dataframes into a single excel workbook
+def save_xlsx(list_dfs, filename):
+    with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+        for ws,df in list_dfs.items():
+            index = df.index.nlevels if df.index.nlevels>1 else 0
+            df.to_excel(writer, sheet_name=ws, index=False, freeze_panes=(1,0))
+            writer.sheets[ws].autofilter(*[df.columns.nlevels-1, 0, df.columns.nlevels-1, index+len(df.columns)-1])
