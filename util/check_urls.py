@@ -6,7 +6,8 @@ from concurrent.futures import ThreadPoolExecutor
 #%% static data
 files = {'jobs':os.path.join(os.path.dirname(os.getcwd()), 'Job Opportunities.xlsx')}
 
-meta = {'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0'}}}
+meta = {'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0'},
+                    'timeout':10}}
 
 #%%
 def random_url(df, co_name, exclude_list):
@@ -19,9 +20,9 @@ def check_url(jobs_df, co_name, link):
     while attempt<=3:
 
         # if status_code 400 (bad request), try without header
-        status = requests.get(url=link, headers=meta['requests']['headers']).status_code
+        status = requests.get(url=link, headers=meta['requests']['headers'], timeout=meta['requests']['timeout']).status_code
         if status in [400]:
-            status = requests.get(url=link).status_code
+            status = requests.get(url=link, timeout=meta['requests']['timeout']).status_code
 
         # try another random link if not successful
         if status!=200:
