@@ -22,4 +22,5 @@ def update(df, g_sheet_key):
     # https://docs.gspread.org/en/latest/api/models/worksheet.html#gspread.worksheet.Worksheet.update
     data['All'] = data['wb'].worksheet('All')
     data['All'].clear()
+    data['All'].resize(rows=len(df))
     data['All'].update(range_name='', values=[data['dataframe'].columns.values.tolist()] + data['dataframe'].values.tolist())
