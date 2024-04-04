@@ -5,7 +5,7 @@ import pandas as pd
 from util import scrape_funcs
 
 #%% static data
-folders = {'archive':'archive', 'export':os.getcwd()}
+folders = {'archive':r'your_path_here/archive', 'export':r'your_path_here/export'}
 
 files = {'export_suffix':'Filtered'}
 files['export'] = f"Job Opportunities_{files['export_suffix']}.xlsx"
@@ -31,8 +31,8 @@ def show_new(last_df, penult_df):
     new_df = last_df[last_df['URL'].isin(new_urls)]
     return(new_df)
 
-#%% get latest list of jobs
-jobs = {'all':pd.read_excel(files['export'].replace(f"_{files['export_suffix']}", ''))}
+#%% get latest list of jobs (from get_all_jobs)
+jobs = {'all':r'your_path_here/all_jobs_file'}
 
 #%% compare latest filtered list with 2nd latest to see new roles posted
 jobs['filtered_latest'] = filter_df(jobs['all'])
@@ -42,6 +42,8 @@ jobs['filtered_penultimate'] = filter_df(jobs['filtered_penultimate'])
 
 jobs['new'] = show_new(jobs['filtered_latest'], jobs['filtered_penultimate'])
 
+print(f"{len(jobs['all'])} job opportunities from {len(set(jobs['all']['Company']))} companies")
+print(f"{len(jobs['filtered_latest'])} jobs based on filters")
 print(f"{len(jobs['new'])} new jobs")
 
 #%% export data
