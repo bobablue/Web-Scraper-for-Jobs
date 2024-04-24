@@ -10,7 +10,9 @@ from util import scrape_funcs, error_handling
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
         'job_max':50, # 50 is max page size
 
-        'requests':{'post':{'regions':'SINGAPORE',
+        'requests':{'headers':{'Referer':'https://talent.antgroup.com/'},
+
+                    'post':{'regions':'SINGAPORE',
                             'language':'en',
                             'pageSize':None,
                             'pageIndex':1}}}
@@ -39,7 +41,8 @@ def jobs(json_obj):
 #%%
 @scrape_funcs.num_jobs(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['post'], json_decode=True)
+    response = scrape_funcs.pull('post', url=meta['urls']['page'], headers=meta['requests']['headers'],
+                                 json=meta['requests']['post'], json_decode=True)
 
     num_jobs = response['totalCount']
     pagesize = response['pageSize']
@@ -50,7 +53,9 @@ def get_jobs():
     # compile subsequent pages
     for i in range(2, pages+1):
         meta['requests']['post']['pageIndex'] = i
-        response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['post'], json_decode=True)
+        response = scrape_funcs.pull('post', url=meta['urls']['page'], headers=meta['requests']['headers'],
+                                     json=meta['requests']['post'], json_decode=True)
+
         jobs_dict.update(jobs(response['content']))
 
     return(jobs_dict)
