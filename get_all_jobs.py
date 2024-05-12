@@ -19,7 +19,14 @@ def pool_getjobs(list_scripts):
     with ThreadPoolExecutor(max_workers=min(os.cpu_count()*5, len(list_scripts))) as executor:
         for i in list_scripts:
             jobs[i] = executor.submit(list_scripts[i].get_jobs)
-    jobs = {k:v.result() for k,v in jobs.items()}
+
+    for k in list(jobs):
+        try:
+            jobs[k] = jobs[k].result()
+        except Exception as e:
+            status['api_errors'].append((k,e))
+            del jobs[k]
+
     return(jobs)
 
 #%% latest timestamp from dataframe in file
@@ -33,6 +40,7 @@ def get_file_date(filepath):
 scripts = {k:v for k,v in company.__dict__.items() if isinstance(v, types.ModuleType) and v.__name__.startswith('company')}
 
 #%% run through all company scripts to get jobs data
+status = {'api_errors':[]}
 jobs = {'dict':pool_getjobs(scripts)}
 
 #%% parse jobs dict to dataframe
@@ -46,11 +54,11 @@ jobs['dataframe'] = jobs['dataframe'].reset_index(drop=True)
 print(f"{len(jobs['dataframe'])} job opportunities from {len(set(jobs['dataframe']['Company']))} companies")
 
 #%% sample check if job URLs are valid. if status is 404, API has probably changed, so code needs an update.
-status = {'all':check_urls.run_checks(jobs['dataframe'])}
-status['errors'] = status['all'][status['all']['Status']!=200]
-status['errors'] = dict(zip(status['errors']['Company'], status['errors']['Status']))
-if status['errors']:
-    print('URL errors:', status['errors'])
+status['sample'] = check_urls.run_checks(jobs['dataframe'])
+status['sample_errors'] = status['sample'][status['sample']['Status']!=200]
+status['sample_errors'] = dict(zip(status['sample_errors']['Company'], status['sample_errors']['Status']))
+if status['sample_errors']:
+    print('URL errors:', status['sample_errors'])
 
 #%% archive current file before saving latest output
 if os.path.isfile(i:=files['export'].replace('_{date}','')):
