@@ -30,6 +30,9 @@ def jobs(json_obj):
 def get_jobs():
     response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['post'], json_decode=True)
 
+    if response['total']==0:
+        return({})
+
     num_jobs = response['total']
     pagesize = meta['job_max']
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)

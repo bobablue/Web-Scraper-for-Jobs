@@ -11,11 +11,13 @@ from util import scrape_funcs, error_handling
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
 
-        'chars':'+-',
+        'chars':'+-[]',
 
         'requests':{'url':{'RecordsPerPage':100,
-                           'Location':'Singapore', 'LocationPath':'1880251',
-                           'SearchResultsModuleName':'Refresh+-+Search+Results', 'SearchType':1}}}
+                           'SearchResultsModuleName':'Search+Results',
+                           'FacetFilters[0].ID':'1880251',
+                           'FacetFilters[0].FacetType':2,
+                           'FacetFilters[0].IsApplied':'true'}}}
 
 #%% functions
 #%%
@@ -23,9 +25,10 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
 def jobs(bs_obj):
     data_dict = {}
-    for i in bs_obj.find_all('a', class_='job-item-padding jobs-list--link text--black'):
-        data_dict[meta['urls']['job']+i['href']]= {'Title':i.find('span', class_='job-jobtitle text--black').text,
-                                                   'Location':i.find('span', class_='job-location text--black').text}
+    for i in bs_obj.find_all('div', class_='list-item list-item--card fs-column fs-top round-corners bg--pale-blue-light p-1 text--black'):
+        job_title = i.find('a', class_='headline-3 job-title--link text--black')
+        data_dict[meta['urls']['job']+job_title['href']] = {'Title':job_title.text,
+                                                            'Location':i.find('div', class_='job-location').text}
 
     data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
@@ -46,6 +49,7 @@ def get_jobs():
 
     bs_obj = BeautifulSoup(response.json()['results'], 'html.parser')
     jobs_dict = jobs(bs_obj)
+
     return(jobs_dict)
 
 #%%

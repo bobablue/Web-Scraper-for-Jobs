@@ -8,9 +8,10 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-        'job_max':1000,
+        'job_max':100, # max, unable to change
 
-        'requests':{'url':{'location':['singapore'], 'format':'json', 'data_format':'detail', 'page':1}}}
+        'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:125.0) Gecko/20100101 Firefox/125.0'},
+                    'url':{'location':['singapore'], 'format':'json', 'data_format':'detail', 'page':1}}}
 
 meta['requests']['url']['per_page'] = meta['job_max']
 
@@ -30,14 +31,26 @@ def jobs(data):
 #%%
 @scrape_funcs.num_jobs(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'], json_decode=True)
+    response = scrape_funcs.pull('get', url=meta['urls']['page'], headers=meta['requests']['headers'],
+                                 params=meta['requests']['url'], json_decode=True)
 
-    # assume num_jobs would not be >1,000, but check just in case
+    if response['total_entries']==0:
+        return({})
+
     num_jobs = response['total_entries']
-    if num_jobs>meta['job_max']:
-        raise ValueError(f"Number of posted jobs greater than defined max: {num_jobs}\nCheck how to pull all")
+    pagesize = len(response['entries'])
+    pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    jobs_dict = jobs(response['entries'])
+    jobs_dict = jobs(response['entries']) # parse first page
+
+    # compile subsequent pages
+    for i in range(2, pages+1):
+        meta['requests']['url']['page'] = i
+        response = scrape_funcs.pull('get', url=meta['urls']['page'], headers=meta['requests']['headers'],
+                                     params=meta['requests']['url'], json_decode=True)
+
+        jobs_dict.update(jobs(response['entries']))
+
     return(jobs_dict)
 
 #%%
