@@ -57,6 +57,11 @@ print(f"{len(jobs['dataframe'])} job opportunities from {len(set(jobs['dataframe
 status['sample'] = check_urls.run_checks(jobs['dataframe'])
 status['sample_errors'] = status['sample'][status['sample']['Status']!=200]
 status['sample_errors'] = dict(zip(status['sample_errors']['Company'], status['sample_errors']['Status']))
+
+#%%
+if status['api_errors']:
+    print('API errors', *sorted(status['api_errors'], key=lambda x:x[0].lower()), sep='\n')
+
 if status['sample_errors']:
     print('URL errors:', status['sample_errors'])
 
