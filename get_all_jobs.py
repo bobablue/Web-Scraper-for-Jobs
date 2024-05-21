@@ -48,13 +48,13 @@ jobs['dataframe'] = pd.DataFrame.from_dict({v1:jobs['dict'][k1][v1] for k1 in jo
                                            orient='index')
 
 jobs['dataframe'] = jobs['dataframe'].reset_index().rename(columns={'index':'URL'})
+
+# some companies are split into multiple sources. combine all to same company name by splitting out separator.
+jobs['dataframe']['Company'] = jobs['dataframe']['Company'].str.split('_').str[0]
 jobs['dataframe'] = jobs['dataframe'][cols['jobs']].sort_values(by=['Company','Location','Title'], key=lambda x:x.str.lower())
 jobs['dataframe'] = jobs['dataframe'].reset_index(drop=True)
 
 print(f"{len(jobs['dataframe'])} job opportunities from {len(set(jobs['dataframe']['Company']))} companies")
-
-#%% some companies are split into multiple sources. combine all to same company name by splitting out separator.
-jobs['dataframe']['Company'] = jobs['dataframe']['Company'].str.split('_').str[0]
 
 #%% sample check if job URLs are valid. if status is 404, API has probably changed, so code needs an update.
 status['sample'] = check_urls.run_checks(jobs['dataframe'])
@@ -68,12 +68,11 @@ if status['api_errors']:
 if status['sample_errors']:
     print('URL errors:', status['sample_errors'])
 
-#%% archive current file before saving latest output
-if os.path.isfile(i:=files['export'].replace('_{date}','')):
+#%% if no API errors, archive current file and save latest output
+if not status['api_errors'] and os.path.isfile(i:=files['export'].replace('_{date}','')):
     shutil.move(i, os.path.join(folders['archive'], files['export'].replace('{date}', get_file_date(i))))
+    scrape_funcs.save_xlsx({'All':jobs['dataframe']}, files['export'].replace('_{date}', ''))
 
-#%% export data locally and to google sheets
-scrape_funcs.save_xlsx({'All':jobs['dataframe']}, files['export'].replace('_{date}', ''))
-
+#%% export to google sheets (doesn't matter if errors exist)
 g_sheets.auth(files['g_sheets_key'])
 g_sheets.update(df=jobs['dataframe'], g_sheet_key='1NuJjghe752QkHOe92w3OtQs6wfO0e74l_HQxZkW9YSs')
