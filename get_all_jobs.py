@@ -53,6 +53,9 @@ jobs['dataframe'] = jobs['dataframe'].reset_index(drop=True)
 
 print(f"{len(jobs['dataframe'])} job opportunities from {len(set(jobs['dataframe']['Company']))} companies")
 
+#%% some companies are split into multiple sources. combine all to same company name by splitting out separator.
+jobs['dataframe']['Company'] = jobs['dataframe']['Company'].str.split('_').str[0]
+
 #%% sample check if job URLs are valid. if status is 404, API has probably changed, so code needs an update.
 status['sample'] = check_urls.run_checks(jobs['dataframe'])
 status['sample_errors'] = status['sample'][status['sample']['Status']!=200]
