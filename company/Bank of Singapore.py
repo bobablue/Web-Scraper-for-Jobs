@@ -29,9 +29,10 @@ def jobs(response_obj):
     data_indices = [(i,i+6,i+7) for i in range(8, len(jobs_text)+1, 42)]
 
     # clean up strings before adding to dict
+    exclude = ['false','Next']
     data_dict = {}
     for idx in data_indices:
-        if jobs_text[idx[1]].isnumeric():
+        if jobs_text[idx[1]] not in exclude:
             data_dict[meta['urls']['job']+jobs_text[idx[1]]] = {'Title':scrape_funcs.decode(jobs_text[idx[0]]),
                                                                 'Location':scrape_funcs.decode(jobs_text[idx[2]])}
 

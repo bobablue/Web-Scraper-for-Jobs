@@ -12,7 +12,7 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 
         'requests':{'json':{'ddoKey':'refineSearch', 'jobs':'true',
                             'from':0, 'size':None,
-                            'selected_fields':{'location':['Singapore, Singapore']}}}}
+                            'selected_fields':{'location':['Singapore']}}}}
 
 meta['requests']['json']['size'] = meta['job_max']
 
