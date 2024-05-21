@@ -20,7 +20,12 @@ def check_url(jobs_df, co_name, link):
     while attempt<=3:
 
         # if status_code 400 (bad request), try without header
-        status = requests.get(url=link, headers=meta['requests']['headers'], timeout=meta['requests']['timeout']).status_code
+        try:
+            status = requests.get(url=link, headers=meta['requests']['headers'], timeout=meta['requests']['timeout']).status_code
+
+        except requests.exceptions.Timeout:
+            continue
+
         if status in [400]:
             status = requests.get(url=link, timeout=meta['requests']['timeout']).status_code
 
