@@ -51,7 +51,7 @@ jobs['dataframe'] = jobs['dataframe'].reset_index().rename(columns={'index':'URL
 
 # some companies are split into multiple sources. combine all to same company name by splitting out separator.
 jobs['dataframe']['Company'] = jobs['dataframe']['Company'].str.split('_').str[0]
-jobs['dataframe'] = jobs['dataframe'][cols['jobs']].sort_values(by=['Company','Location','Title'], key=lambda x:x.str.lower())
+jobs['dataframe'] = jobs['dataframe'][cols['jobs']].sort_values(by=['Company','Title'], key=lambda x:x.str.lower())
 jobs['dataframe'] = jobs['dataframe'].reset_index(drop=True)
 
 print(f"{len(jobs['dataframe'])} job opportunities from {len(set(jobs['dataframe']['Company']))} companies")
