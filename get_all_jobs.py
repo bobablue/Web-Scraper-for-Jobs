@@ -36,6 +36,16 @@ def get_file_date(filepath):
     date = max(set(df['Date Scraped']))
     return(date.strftime('%Y-%m-%d %H%M'))
 
+#%% summary of number of jobs for each company
+def summarize(df):
+    s_df = df.copy()
+    s_df = s_df.groupby(['Company'], as_index=False).agg({'URL':'count',
+                                                          'Date Scraped':lambda x:sorted(list(set(x)))[0]})
+
+    s_df = s_df.rename(columns={'URL':'Number of Job Postings'})
+    s_df = s_df.sort_values(by=['Company'], key=lambda x:x.str.lower()).reset_index(drop=True)
+    return(s_df)
+
 #%% get list of company scripts
 scripts = {k:v for k,v in company.__dict__.items() if isinstance(v, types.ModuleType) and v.__name__.startswith('company')}
 
@@ -54,6 +64,9 @@ jobs['dataframe']['Company'] = jobs['dataframe']['Company'].str.split('_').str[0
 jobs['dataframe'] = jobs['dataframe'][cols['jobs']].sort_values(by=['Company','Title'], key=lambda x:x.str.lower())
 jobs['dataframe'] = jobs['dataframe'].reset_index(drop=True)
 
+jobs['summary'] = summarize(jobs['dataframe'])
+jobs['dataframe'] = jobs['dataframe'].drop(['Date Scraped'], axis=1) # same info in summary, don't need in all
+
 print(f"{len(jobs['dataframe'])} job opportunities from {len(set(jobs['dataframe']['Company']))} companies")
 
 #%% sample check if job URLs are valid. if status is 404, API has probably changed, so code needs an update.
@@ -71,8 +84,9 @@ if status['sample_errors']:
 #%% if no API errors, archive current file and save latest output
 if not status['api_errors'] and os.path.isfile(i:=files['export'].replace('_{date}','')):
     shutil.move(i, os.path.join(folders['archive'], files['export'].replace('{date}', get_file_date(i))))
-    scrape_funcs.save_xlsx({'All':jobs['dataframe']}, files['export'].replace('_{date}', ''))
+    scrape_funcs.save_xlsx({'All':jobs['dataframe'], 'Summary':jobs['summary']}, files['export'].replace('_{date}', ''))
 
 #%% export to google sheets (doesn't matter if errors exist)
 g_sheets.auth(files['g_sheets_key'])
-g_sheets.update(df=jobs['dataframe'], g_sheet_key='1NuJjghe752QkHOe92w3OtQs6wfO0e74l_HQxZkW9YSs')
+g_sheets.update(df=jobs['dataframe'], g_sheet_key='1NuJjghe752QkHOe92w3OtQs6wfO0e74l_HQxZkW9YSs', sheet_name='All')
+g_sheets.update(df=jobs['summary'], g_sheet_key='1NuJjghe752QkHOe92w3OtQs6wfO0e74l_HQxZkW9YSs', sheet_name='Summary')
