@@ -32,7 +32,13 @@ def jobs(data):
 @scrape_funcs.num_jobs(__file__)
 def get_jobs():
     response = scrape_funcs.pull('get', url=meta['urls']['page'], headers=meta['requests']['headers'],
-                                 params=meta['requests']['url'], json_decode=True)
+                                 params=meta['requests']['url'])
+
+    # happens too many times to not build an exception for... weak.
+    if 'just a moment' in response.text.lower():
+        return({})
+
+    response = response.json()
 
     if response['total_entries']==0:
         return({})
