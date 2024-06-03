@@ -31,7 +31,7 @@ def pool_getjobs(list_scripts):
 
 #%% latest timestamp from dataframe in file
 def get_file_date(filepath):
-    df = pd.read_excel(filepath, sheet_name='All')
+    df = pd.read_excel(filepath, sheet_name='Summary')
     df['Date Scraped'] = pd.to_datetime(df['Date Scraped'])
     date = max(set(df['Date Scraped']))
     return(date.strftime('%Y-%m-%d %H%M'))
