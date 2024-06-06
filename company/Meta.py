@@ -32,15 +32,10 @@ def jobs(json_obj):
 @scrape_funcs.num_jobs(__file__)
 def get_jobs():
     # get tokens
-    # when request too many times in short period, 'get' loads a login page instead of the portal html
-    # hence, no token is loaded. in that case, use arbitrary hard-coded token
     response = scrape_funcs.pull('get', url=meta['urls']['cookie'])
 
-    try:
-        token = response.text
-        token = re.search(r'\["LSD",\[\],{"token":"(.+)"},323]', token).group(1)
-    except AttributeError:
-        token = 'AVpq_C3BKlo'
+    token = response.text
+    token = re.search(r'\["LSD",\[\],{"token":"(.+)"},323]', token).group(1)
 
     # update parameters with token
     meta['requests']['headers']['X-FB-LSD'] = token
