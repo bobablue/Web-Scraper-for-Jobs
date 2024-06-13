@@ -29,6 +29,12 @@ def pool_getjobs(list_scripts):
 
     return(jobs)
 
+#%%
+def retry_getjobs(list_scripts):
+    status['api_errors'] = [] # clear api_errors status list before retrying
+    jobs_dict = pool_getjobs(list_scripts)
+    return(jobs_dict)
+
 #%% latest timestamp from dataframe in file
 def get_file_date(filepath):
     df = pd.read_excel(filepath, sheet_name='Summary')
@@ -52,6 +58,13 @@ scripts = {k:v for k,v in company.__dict__.items() if isinstance(v, types.Module
 #%% run through all company scripts to get jobs data
 status = {'api_errors':[]}
 jobs = {'dict':pool_getjobs(scripts)}
+
+#%% retry those that failed
+attempt = 1
+while status['api_errors'] and attempt<=2:
+    print(f"Retrying attempt {attempt}: {[i[0] for i in status['api_errors']]}")
+    jobs['dict'].update(retry_getjobs({k:v for k,v in scripts.items() if k in [i[0] for i in status['api_errors']]}))
+    attempt += 1
 
 #%% parse jobs dict to dataframe
 jobs['dataframe'] = pd.DataFrame.from_dict({v1:jobs['dict'][k1][v1] for k1 in jobs['dict'].keys() for v1 in jobs['dict'][k1].keys()},
