@@ -44,10 +44,19 @@ def get_file_date(filepath):
 
 #%% summary of number of jobs for each company
 def summarize(df):
-    s_df = df.copy()
-    s_df = s_df.groupby(['Company'], as_index=False).agg({'URL':'count',
-                                                          'Date Scraped':lambda x:sorted(list(set(x)))[0]})
+    date_scraped = sorted(list(set(df['Date Scraped'])))[0]
 
+    s_df = df.copy()
+    s_df = s_df.groupby(['Company'], as_index=False)['URL'].count()
+
+    # include companies with 0 jobs
+    companies_zero = set(scripts) - set(s_df['Company'])
+    print(f"No postings from: {sorted(list(companies_zero))}")
+    companies_zero = pd.DataFrame(companies_zero, columns=['Company'])
+    companies_zero['URL'] = 0
+
+    s_df = pd.concat([s_df, companies_zero], ignore_index=True)
+    s_df['Date Scraped'] = date_scraped
     s_df = s_df.rename(columns={'URL':'Number of Job Postings'})
     s_df = s_df.sort_values(by=['Company'], key=lambda x:x.str.lower()).reset_index(drop=True)
     return(s_df)
