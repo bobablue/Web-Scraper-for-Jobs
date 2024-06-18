@@ -50,7 +50,7 @@ def summarize(df):
     s_df = s_df.groupby(['Company'], as_index=False)['URL'].count()
 
     # include companies with 0 jobs
-    companies_zero = set(scripts) - set(s_df['Company'])
+    companies_zero = set([i.split('_')[0] for i in scripts]) - set(s_df['Company'])
     print(f"No postings from: {sorted(list(companies_zero))}")
     companies_zero = pd.DataFrame(companies_zero, columns=['Company'])
     companies_zero['URL'] = 0
