@@ -89,7 +89,7 @@ jobs['dataframe'] = jobs['dataframe'].reset_index(drop=True)
 jobs['summary'] = summarize(jobs['dataframe'])
 jobs['dataframe'] = jobs['dataframe'].drop(['Date Scraped'], axis=1) # same info in summary, don't need in all
 
-print(f"{len(jobs['dataframe'])} job opportunities from {len(set(jobs['dataframe']['Company']))} companies")
+print(f"{jobs['summary']['Number of Job Postings'].sum():,} job opportunities from {len(jobs['summary'])} companies")
 
 #%% sample check if job URLs are valid. if status is 404, API has probably changed, so code needs an update.
 status['sample'] = check_urls.run_checks(jobs['dataframe'])
