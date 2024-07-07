@@ -44,8 +44,7 @@ def jobs(js_obj):
 
     jobs_all = {k:v.result() for k,v in jobs_all.items()}
 
-    # filter to only locations selected
-    jobs_filtered = {k:v for k,v in jobs_all.items() if any(x in v['Location'].lower() for x in meta['locations'])}
+    jobs_filtered = scrape_funcs.restrict_loc(jobs_all, meta['locations'])
     return(jobs_filtered)
 
 #%%

@@ -43,8 +43,7 @@ def jobs(bs_obj):
         for j in data:
             jobs_all[j[0]] = {'Title':j[1], 'Job Function':j[2], 'Location':j[3]}
 
-    # filter to only locations selected
-    jobs_filtered = {k:v for k,v in jobs_all.items() if any(x in v['Location'].lower() for x in meta['locations'])}
+    jobs_filtered = scrape_funcs.restrict_loc(jobs_all, meta['locations'])
     return(jobs_filtered)
 
 #%% not sure how the loop/next page structure is like

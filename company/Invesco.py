@@ -25,8 +25,7 @@ def jobs(json_obj):
     for i in json_obj:
         data_dict[meta['urls']['job'] + i['externalPath']] = {'Title':i['title'], 'Location':i['locationsText']}
 
-    # restrict to selected countries
-    data_dict = {k:v for k,v in data_dict.items() if any(x in v['Location'].lower() for x in meta['locations'])}
+    data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
 

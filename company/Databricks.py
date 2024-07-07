@@ -33,8 +33,7 @@ def jobs(json_obj):
                                                'Job Function':collapse_list_dict(j['departments']),
                                                'Location':j['location']['name']}
 
-    # filter to only locations selected
-    jobs_filtered = {k:v for k,v in jobs_all.items() if any(x in v['Location'].lower() for x in meta['locations'])}
+    jobs_filtered = scrape_funcs.restrict_loc(jobs_all, meta['locations'])
     return(jobs_filtered)
 
 #%%

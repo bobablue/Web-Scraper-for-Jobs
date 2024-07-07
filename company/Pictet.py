@@ -49,8 +49,7 @@ def jobs(response_obj):
     for d in data:
         data_dict[d[0]] = {'Title':d[1], 'Location':d[2], 'Job Function':d[3]}
 
-    # restrict to singapore only
-    data_dict = {k:v for k,v in data_dict.items() if v['Location'].lower() in meta['locations']}
+    data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     return(data_dict)
 
 #%%

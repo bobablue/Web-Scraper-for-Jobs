@@ -71,8 +71,7 @@ def jobs(json_obj):
                                                   'Location':locs[i['l']] if i['l'] in locs else i['l'],
                                                   'Job Function':lookup['departments'][i['dp']]}
 
-    # restrict to selected countries only
-    data_dict = {k:v for k,v in data_dict.items() if any(x in v['Location'].lower() for x in meta['locations'])}
+    data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     return(data_dict)
 
 #%% get all jobs

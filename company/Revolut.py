@@ -11,7 +11,6 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-
         'locations':['singapore'],
 
         'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0',
@@ -29,8 +28,7 @@ def jobs(json_obj):
                                                   'Job Function':i['team'],
                                                   'Location':locations}
 
-    # keep only selected locations
-    data_dict = {k:v for k,v in data_dict.items() if any(x in v['Location'].lower() for x in meta['locations'])}
+    data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     return(data_dict)
 
 #%%

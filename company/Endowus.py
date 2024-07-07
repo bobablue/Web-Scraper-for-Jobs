@@ -25,8 +25,7 @@ def jobs(soup_obj):
         job_func, loc = job.find('div', class_='job-post-card__position').text.split(' | ')
         data_dict[url] = {'Title':title, 'Job Function':job_func, 'Location':loc}
 
-    # restrict to selected locations only
-    data_dict = {k:v for k,v in data_dict.items() if any(x in v['Location'].lower() for x in meta['locations'])}
+    data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     return(data_dict)
 
 #%%

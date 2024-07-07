@@ -25,8 +25,7 @@ def jobs(json_obj):
 
             data_dict[job['absolute_url']] = {'Title':job['title'], 'Job Function':job_func, 'Location':job_loc}
 
-    # keep only selected locations
-    data_dict = {k:v for k,v in data_dict.items() if any(x in v['Location'].lower() for x in meta['locations'])}
+    data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     return(data_dict)
 
 #%%

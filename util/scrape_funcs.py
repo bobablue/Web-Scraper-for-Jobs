@@ -81,6 +81,11 @@ def clean_loc(data_dict):
             j['Location'] = 'Singapore'
     return(data_dict)
 
+#%% restrict to selected locations only
+def restrict_loc(data_dict, loc_list):
+    restricted = {k:v for k,v in data_dict.items() if any(x in v['Location'].lower() for x in loc_list)}
+    return(restricted)
+
 #%% save dict as json file
 def to_json(co_name, jobs_dict):
     with open(f'{co_name}.json', 'w', encoding='utf-8') as f:

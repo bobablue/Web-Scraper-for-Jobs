@@ -8,7 +8,8 @@ if __name__=='__main__' and __package__ is None:
 from util import scrape_funcs, error_handling
 
 #%% static data
-meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0])}
+meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
+        'locations':['singapore']}
 
 #%% functions
 #%%
@@ -24,8 +25,8 @@ def jobs(response_obj):
                                            'Location':job.find('location').text,
                                            'Job Function':job.find('adcode').text}
 
+    data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     data_dict = scrape_funcs.clean_loc(data_dict)
-    data_dict = {k:v for k,v in data_dict.items() if v['Location'].lower()=='singapore'}
     return(data_dict)
 
 #%%
