@@ -28,10 +28,11 @@ def num_jobs(script_name):
 #%% request
 @error_handling.requests_error
 def pull(pulltype, json_decode=False, **kwargs):
+    timeout = 30
     if pulltype=='get':
-        response = requests.get(**kwargs)
+        response = requests.get(timeout=timeout, **kwargs)
     elif pulltype=='post':
-        response = requests.post(**kwargs)
+        response = requests.post(timeout=timeout, **kwargs)
     if json_decode:
         return(response.json())
     return(response)
