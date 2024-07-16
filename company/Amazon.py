@@ -39,10 +39,15 @@ def get_jobs():
     jobs_dict = jobs(response['jobs']) # parse first page
 
     # compile subsequent pages
-    for i in range(pages-1):
-        meta['requests']['url']['offset'] = meta['requests']['url']['offset'] + pagesize
-        response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'], json_decode=True)
-        jobs_dict.update(jobs(response['jobs']))
+    page_info = scrape_funcs.gen_page_info(params=meta['requests']['url'],
+                                           page_range=range(1, pages+1),
+                                           page_param='offset',
+                                           multiplier=pagesize)
+
+    responses = scrape_funcs.concurrent_pull('get', url=meta['urls']['page'], params=page_info, json_decode=True)
+
+    for v in responses.values():
+        jobs_dict.update(jobs(v['jobs']))
 
     return(jobs_dict)
 

@@ -1,7 +1,6 @@
 import os
 import datetime
-from bs4 import BeautifulSoup
-import re
+from concurrent.futures import ThreadPoolExecutor
 
 # import custom scripts (https://stackoverflow.com/a/38455936)
 if __name__=='__main__' and __package__ is None:
@@ -10,49 +9,60 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-        'job_max':20, # default, unable to change
 
-        'requests':{'url':{'location':'singapore-SGP', 'page':1}}}
+        'requests':{'json':{'page':1, 'locale':'en-sg',
+                            'filters':{'postingpostLocation':['postLocation-SGP']}}}}
 
 #%% functions
 #%%
+def get_token(url):
+    response = scrape_funcs.pull('get', url=url)
+    token = {'cookies':response.cookies.get_dict(),
+             'headers':{'X-Apple-CSRF-Token':response.headers['x-apple-csrf-token']}}
+    return(token)
+
+#%%
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
-def jobs(soup_obj):
-    titles_funcs = soup_obj.find_all('td', class_='table-col-1')
-    links = [i.find('a')['href'] for i in titles_funcs]
-    titles = [i.find('a').text for i in titles_funcs]
-    job_funcs = [i.find('span', class_='table--advanced-search__role').text for i in titles_funcs]
-
-    locs = soup_obj.find_all('td', class_='table-col-2')
-    locs = [' '.join(i.text.split()) for i in locs]
-
-    data = zip(links, titles, job_funcs, locs)
+def jobs(json_obj):
     data_dict = {}
-    for i in data:
-        data_dict[meta['urls']['job'] + i[0]] = {'Title':i[1], 'Job Function':i[2], 'Location':i[3]}
-
+    for i in json_obj:
+        data_dict[meta['urls']['job'] + i['positionId']] = {'Title':i['postingTitle'],
+                                                            'Job Function':i['team']['teamName'],
+                                                            'Location':i['locations'][0]['name']}
     return(data_dict)
 
 #%%
 @scrape_funcs.num_jobs(__file__)
 def get_jobs():
-    response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
-    bs_obj = BeautifulSoup(response.content, 'html.parser')
+    # get first page
+    token = get_token(meta['urls']['cookie'])
+    response = scrape_funcs.pull('post', url=meta['urls']['page'], json=meta['requests']['json'],
+                                 json_decode=True, **token)
 
-    num_jobs = bs_obj.find('h2', id='resultCount').find('span').text
-    num_jobs = int(re.search(r'(\d+) Result\(s\)', num_jobs).group(1))
-    pagesize = meta['job_max']
+    num_jobs = response['totalRecords']
+    pagesize = len(response['searchResults'])
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
-    jobs_dict = jobs(bs_obj) # parse first page
+    jobs_dict = jobs(response['searchResults']) # parse first page
 
     # compile subsequent pages
+    page_info = {}
     for i in range(2, pages+1):
-        meta['requests']['url']['page'] = i
-        response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
-        bs_obj = BeautifulSoup(response.content, 'html.parser')
-        jobs_dict.update(jobs(bs_obj))
+        page_info[i] = get_token(meta['urls']['cookie'])
+        page_info[i].update({'json':meta['requests']['json'].copy()})
+        page_info[i]['json']['page'] = i
+
+    responses = {}
+    with ThreadPoolExecutor(max_workers=len(page_info)) as executor:
+        for i in page_info:
+            responses[i] = executor.submit(scrape_funcs.pull, 'post', url=meta['urls']['page'],
+                                           json_decode=True, **page_info[i])
+
+        responses = {k:v.result() for k,v in responses.items()}
+
+    for v in responses.values():
+        jobs_dict.update(jobs(v['searchResults']))
 
     return(jobs_dict)
 

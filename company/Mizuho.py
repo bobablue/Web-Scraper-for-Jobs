@@ -55,12 +55,16 @@ def get_jobs():
     jobs_dict = jobs(response['Jobs']['Job']) # parse first page
 
     # compile subsequent pages
-    for i in range(2,pages+1):
-        meta['requests']['post']['pageNumber'] = i
-        response = scrape_funcs.pull('post', json_decode=True, url=meta['urls']['page_n'],
-                                     headers=meta['requests']['headers'], data=meta['requests']['post'])
+    page_info = scrape_funcs.gen_page_info(params=meta['requests']['post'],
+                                           page_range=range(2, pages+1),
+                                           page_param='pageNumber',
+                                           multiplier=1)
 
-        jobs_dict.update(jobs(response['Jobs']['Job']))
+    responses = scrape_funcs.concurrent_pull('post', url=meta['urls']['page_n'], headers=meta['requests']['headers'],
+                                             data=page_info, json_decode=True)
+
+    for v in responses.values():
+        jobs_dict.update(jobs(v['Jobs']['Job']))
 
     return(jobs_dict)
 

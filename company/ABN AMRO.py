@@ -1,7 +1,5 @@
 import os
 import datetime
-from concurrent.futures import ThreadPoolExecutor
-import copy
 
 # import custom scripts (https://stackoverflow.com/a/38455936)
 if __name__=='__main__' and __package__ is None:
@@ -26,6 +24,7 @@ def jobs(json_obj):
     for i in json_obj:
         data_dict[meta['urls']['job'] + str(i['id'])] = {'Title':i['title'], 'Location':i['city']}
 
+    # restrict to selected locations
     data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     return(data_dict)
 
@@ -42,18 +41,15 @@ def get_jobs():
     jobs_dict = jobs(response['vacancies']) # parse first page
 
     # compile subsequent pages
-    responses = {}
-    with ThreadPoolExecutor(max_workers=min(os.cpu_count()*10, pages)) as executor:
-        for i in range(2, pages+1):
-            params = copy.deepcopy(meta['requests']['url'])
-            params['pageNumber'] = i
-            responses[i] = executor.submit(scrape_funcs.pull, 'get', url=meta['urls']['page'],
-                                           headers=meta['requests']['headers'], params=params,
-                                           json_decode=True)
+    page_info = scrape_funcs.gen_page_info(params=meta['requests']['url'],
+                                           page_range=range(2, pages+1),
+                                           page_param='pageNumber',
+                                           multiplier=1)
 
-        responses = {k:v.result() for k,v in responses.items()}
+    responses = scrape_funcs.concurrent_pull('get', url=meta['urls']['page'], headers=meta['requests']['headers'],
+                                             params=page_info, json_decode=True)
 
-    for k,v in responses.items():
+    for v in responses.values():
         jobs_dict.update(jobs(v['vacancies']))
 
     return(jobs_dict)

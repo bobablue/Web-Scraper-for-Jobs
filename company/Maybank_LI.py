@@ -42,11 +42,15 @@ def get_jobs():
     pages = num_jobs//pagesize + (num_jobs % pagesize>0)
 
     # compile subsequent pages
-    for i in range(1,pages):
-        meta['requests']['url']['start'] = i * pagesize
-        response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'])
-        bs_obj = BeautifulSoup(response.content, 'html.parser')
-        jobs_dict.update(jobs(bs_obj))
+    page_info = scrape_funcs.gen_page_info(params=meta['requests']['url'],
+                                           page_range=range(1, pages),
+                                           page_param='startrow',
+                                           multiplier=pagesize)
+
+    responses = scrape_funcs.concurrent_pull('get', url=meta['urls']['page'], params=page_info)
+
+    for v in responses.values():
+        jobs_dict.update(jobs(BeautifulSoup(v.content, 'html.parser')))
 
     return(jobs_dict)
 
