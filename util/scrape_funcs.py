@@ -5,6 +5,8 @@ import requests
 import urllib.parse
 import html
 import json
+import copy
+from concurrent.futures import ThreadPoolExecutor
 
 #%%
 def get_urls(filepath, company_name):
@@ -28,7 +30,7 @@ def num_jobs(script_name):
 #%% request
 @error_handling.requests_error
 def pull(pulltype, json_decode=False, **kwargs):
-    timeout = 30
+    timeout = 20
     if pulltype=='get':
         response = requests.get(timeout=timeout, **kwargs)
     elif pulltype=='post':
@@ -36,6 +38,30 @@ def pull(pulltype, json_decode=False, **kwargs):
     if json_decode:
         return(response.json())
     return(response)
+
+#%% generate page info for concurrent pulls
+def gen_page_info(params, page_range, page_param, multiplier):
+    page_info = {}
+    for i in page_range:
+        page_info[i] = copy.deepcopy(params)
+        page_info[i][page_param] = i * multiplier
+    return(page_info)
+
+#%% concurrent pulls for scripts with more than 1 page
+def concurrent_pull(pull_type, url, **kwargs):
+
+    if len(param:=[i for i in ['params','json','data'] if i in list(kwargs)])==1:
+        param = param[0]
+    else:
+        raise ValueError(f"Should only have 1 param, but there are {param}")
+
+    responses = {}
+    inputs = {k:v for k,v in kwargs.items() if k!=param}
+    with ThreadPoolExecutor(max_workers=min(os.cpu_count()*10, max(len(kwargs[param]),1))) as executor:
+        for k,v in kwargs[param].items():
+            responses[k] = executor.submit(pull, pull_type, url=url, **(inputs | {param:v}))
+        responses = {k:v.result() for k,v in responses.items()}
+    return(responses)
 
 #%% add company name and date scraped to pulled data
 def metadata(co, date):

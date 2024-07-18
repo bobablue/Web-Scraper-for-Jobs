@@ -22,7 +22,7 @@ def jobs(json_obj):
                                                          'Job Function':i['team'],
                                                          'Location':meta['loc_map'][i['city']]}
 
-    # restrict to singapore only
+    # restrict to selected countries
     data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     return(data_dict)
 
