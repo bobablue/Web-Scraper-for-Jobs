@@ -8,7 +8,7 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-        'job_max':10, # 10 is default pagesize and cannot be changed
+        'job_max':10, # default pagesize, cannot be changed
 
         'requests':{'url':{'location':'Singapore', 'domain':'paypal.com', 'start':0, 'num':None}}}
 
@@ -36,10 +36,15 @@ def get_jobs():
     jobs_dict = jobs(response['positions']) # parse first page
 
     # compile subsequent pages
-    for i in range(1,pages):
-        meta['requests']['url']['start'] = i * pagesize
-        response = scrape_funcs.pull('get', url=meta['urls']['page'], params=meta['requests']['url'], json_decode=True)
-        jobs_dict.update(jobs(response['positions']))
+    page_info = scrape_funcs.gen_page_info(params=meta['requests']['url'],
+                                           page_range=range(1, pages),
+                                           page_param='start',
+                                           multiplier=pagesize)
+
+    responses = scrape_funcs.concurrent_pull('get', url=meta['urls']['page'], params=page_info, json_decode=True)
+
+    for v in responses.values():
+        jobs_dict.update(jobs(v['positions']))
 
     return(jobs_dict)
 
