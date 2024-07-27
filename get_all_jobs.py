@@ -71,7 +71,7 @@ jobs = {'dict':pool_getjobs(scripts)}
 #%% retry those that failed
 attempt = 1
 while status['api_errors'] and attempt<=2:
-    print(f"Retrying attempt {attempt}: {[i[0] for i in status['api_errors']]}")
+    print(f"Retrying attempt {attempt}: {sorted([i[0] for i in status['api_errors']])}")
     jobs['dict'].update(retry_getjobs({k:v for k,v in scripts.items() if k in [i[0] for i in status['api_errors']]}))
     attempt += 1
 
