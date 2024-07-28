@@ -9,7 +9,8 @@ files = {'jobs':os.path.join(os.path.dirname(os.getcwd()), 'Job Opportunities.xl
 meta = {'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0'},
                     'timeout':10},
 
-        'company':{'Revolut':{'Priority':'u=1'}}}
+        'company':{'Revolut':{'Accept-Language':'en-US,en;q=0.5',
+                              'Priority':'u=0, i'}}}
 
 #%%
 def random_url(df, co_name, exclude_list):

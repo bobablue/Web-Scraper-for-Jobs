@@ -13,8 +13,9 @@ from util import scrape_funcs, error_handling
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
         'locations':['singapore'],
 
-        'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0',
-                               'Priority':'u=1'}}}
+        'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:128.0) Gecko/20100101 Firefox/128.0',
+                               'Accept-Language':'en-US,en;q=0.5',
+                               'Priority':'u=0, i'}}}
 
 #%% functions
 #%%
