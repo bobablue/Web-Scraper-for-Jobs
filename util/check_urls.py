@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 #%% static data
 files = {'jobs':os.path.join(os.path.dirname(os.getcwd()), 'Job Opportunities.xlsx')}
 
-meta = {'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0'},
+meta = {'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0'},
                     'timeout':10},
 
         'company':{'Revolut':{'Accept-Language':'en-US,en;q=0.5',
