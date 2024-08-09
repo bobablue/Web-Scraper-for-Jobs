@@ -10,7 +10,7 @@ from util import scrape_funcs, error_handling
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
 
-        'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0',
+        'requests':{'headers':{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:128.0) Gecko/20100101 Firefox/128.0',
                                'Accept-Language':'en-US,en;q=0.5'},
 
                     'url':{'page':1}}}
@@ -20,22 +20,13 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 @error_handling.data_error
 @scrape_funcs.metadata(meta['urls']['company'], datetime.datetime.today().replace(microsecond=0))
 def jobs(bs_obj):
-    card_types = ['category-2', 'category-2 focus', 'category-28 focus', 'category-33']
-    card_types = [f"card-custom card-offer {i}" for i in card_types]
-
-    data = []
-    for i in card_types:
-        data.extend([x.find('a') for x in bs_obj.find_all('article', class_=i)])
-
-    urls = [i['href'] for i in data]
-    titles = [i.find('h3').text.strip() for i in data]
-    locs = [' '.join(i.find('div', class_='offer-location').text.split()) for i in data]
-    data_zip = zip(urls, titles, locs)
-
+    data = [i for i in bs_obj.find_all('a', class_='card-link') if 'career' in i['href']]
     data_dict = {}
-    for i in data_zip:
-        data_dict[meta['urls']['job']+i[0]] = {'Title':i[1], 'Location':i[2]}
+    for i in data:
+        data_dict[meta['urls']['job']+i['href']] = {'Title':i.find('h3').text.strip(),
+                                                    'Location':i.find('div', class_='offer-location').text.strip()}
 
+    data_dict = scrape_funcs.clean_loc(data_dict)
     return(data_dict)
 
 #%%
