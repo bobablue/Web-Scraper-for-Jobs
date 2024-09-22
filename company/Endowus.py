@@ -22,8 +22,8 @@ def jobs(soup_obj):
         job = i.find_all('a', class_='job-post-card__link w-inline-block')[0]
         url = meta['urls']['job'] + job['href']
         title = job.find('div', class_='job-posting-card__title-txt').text
-        job_func, loc = job.find('div', class_='job-post-card__position').text.split(' | ')
-        data_dict[url] = {'Title':title, 'Job Function':job_func, 'Location':loc}
+        job_func, loc = job.find('div', class_='job-post-card__position').text.split('|')
+        data_dict[url] = {'Title':title, 'Job Function':job_func.strip(), 'Location':loc.strip()}
 
     data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
     return(data_dict)
