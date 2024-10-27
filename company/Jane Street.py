@@ -8,8 +8,7 @@ from util import scrape_funcs, error_handling
 
 #%% static data
 meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'urls.csv'), os.path.splitext(os.path.basename(__file__))[0]),
-        'locations':['singapore'],
-        'loc_map':{'HKG':'Hong Kong', 'LDN':'London', 'NYC':'New York', 'SGP':'Singapore'}}
+        'locations':{'sgp':'Singapore'}}
 
 #%% functions
 #%%
@@ -18,12 +17,13 @@ meta = {'urls':scrape_funcs.get_urls(os.path.join(os.path.dirname(__file__), 'ur
 def jobs(json_obj):
     data_dict = {}
     for i in json_obj:
-        data_dict[meta['urls']['job'] + str(i['id'])] = {'Title':i['position'],
-                                                         'Job Function':i['team'],
-                                                         'Location':meta['loc_map'][i['city']]}
 
-    # restrict to selected countries
-    data_dict = scrape_funcs.restrict_loc(data_dict, meta['locations'])
+        # json location data in 3-letter codes but there is no exhaustive list. so take only chosen locations.
+        if loc:=meta['locations'].get(i['city'].lower()):
+            data_dict[meta['urls']['job'] + str(i['id'])] = {'Title':i['position'],
+                                                             'Job Function':i['team'],
+                                                             'Location':loc}
+
     return(data_dict)
 
 #%%
