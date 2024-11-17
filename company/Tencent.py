@@ -21,9 +21,10 @@ meta['requests']['url']['pageSize'] = meta['job_max']
 def jobs(json_obj):
     data_dict = {}
     for i in json_obj:
-        data_dict[i['PostURL']] = {'Title':i['RecruitPostName'],
-                                   'Job Function':i['CategoryName'],
-                                   'Location':i['CountryName']}
+        url = i['PostURL'].replace(r'////',r'//')
+        data_dict[url] = {'Title':i['RecruitPostName'],
+                          'Job Function':i['CategoryName'],
+                          'Location':i['CountryName']}
     return(data_dict)
 
 #%%
